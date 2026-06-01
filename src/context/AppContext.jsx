@@ -5,7 +5,14 @@ import {
   initialChannels,
   initialMessages,
   initialThreadReplies,
-  initialDirectMessages
+  initialDirectMessages,
+  initialAnnouncements,
+  initialEvents,
+  initialCommunities,
+  initialActivityFeed,
+  initialSchedule,
+  initialDeadlines,
+  initialTrending
 } from "../data/mockData";
 
 const AppContext = createContext();
@@ -37,6 +44,24 @@ export function AppProvider({ children }) {
   const [activeThreadParentId, setActiveThreadParentId] = useState(() => getStored("activeThreadParentId", null));
   const [searchQuery, setSearchQuery] = useState("");
   const [systemAccent, setSystemAccent] = useState(() => getStored("systemAccent", "emerald")); // emerald, teal, mint, steel
+
+  // Dashboard & Collegiate States
+  const [announcements, setAnnouncements] = useState(() => getStored("announcements", initialAnnouncements));
+  const [events, setEvents] = useState(() => getStored("events", initialEvents));
+  const [communities, setCommunities] = useState(() => getStored("communities", initialCommunities));
+  const [activityFeed, setActivityFeed] = useState(() => getStored("activityFeed", initialActivityFeed));
+  const [schedule, setSchedule] = useState(() => getStored("schedule", initialSchedule));
+  const [deadlines, setDeadlines] = useState(() => getStored("deadlines", initialDeadlines));
+  const [trending, setTrending] = useState(() => getStored("trending", initialTrending));
+
+  // Sync collegiate states to localStorage
+  useEffect(() => { localStorage.setItem("unisphere_announcements", JSON.stringify(announcements)); }, [announcements]);
+  useEffect(() => { localStorage.setItem("unisphere_events", JSON.stringify(events)); }, [events]);
+  useEffect(() => { localStorage.setItem("unisphere_communities", JSON.stringify(communities)); }, [communities]);
+  useEffect(() => { localStorage.setItem("unisphere_activityFeed", JSON.stringify(activityFeed)); }, [activityFeed]);
+  useEffect(() => { localStorage.setItem("unisphere_schedule", JSON.stringify(schedule)); }, [schedule]);
+  useEffect(() => { localStorage.setItem("unisphere_deadlines", JSON.stringify(deadlines)); }, [deadlines]);
+  useEffect(() => { localStorage.setItem("unisphere_trending", JSON.stringify(trending)); }, [trending]);
 
   // Sync state to localStorage whenever it changes
   useEffect(() => {
@@ -457,7 +482,21 @@ export function AppProvider({ children }) {
         updateUserStatus,
         setActiveThreadParentId,
         setActiveChannelId,
-        setActiveChannelType
+        setActiveChannelType,
+        announcements,
+        setAnnouncements,
+        events,
+        setEvents,
+        communities,
+        setCommunities,
+        activityFeed,
+        setActivityFeed,
+        schedule,
+        setSchedule,
+        deadlines,
+        setDeadlines,
+        trending,
+        setTrending
       }}
     >
       {children}

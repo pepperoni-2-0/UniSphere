@@ -14,7 +14,7 @@ import {
 import './AuthScreen.css';
 
 const AuthScreen = () => {
-  const { login } = useAppContext();
+  const { loginUser } = useAppContext();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -31,7 +31,7 @@ const AuthScreen = () => {
       if (user) {
         // Assume password is 'password' for all mock users
         if (password === 'password' || password === '') {
-          login(user);
+          loginUser(user.id);
         } else {
           setError('Invalid password. (Hint: use "password")');
         }

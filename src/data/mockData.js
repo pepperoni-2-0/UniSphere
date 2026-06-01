@@ -320,3 +320,155 @@ export const initialDirectMessages = [
     ]
   }
 ];
+
+export const initialAnnouncements = [
+  {
+    id: "ann_1",
+    title: "Mid-Semester Examination Schedule Released",
+    sender: "Dean Academics Office",
+    role: "Admin",
+    date: "2026-06-01",
+    tag: "Academics",
+    content: "The mid-semester examination timetable for all UG and PG programs has been officially uploaded. Exams will commence from June 15, 2026. Please check the student portal for detailed slot mappings and seating arrangements. Reach out to the Controller of Examinations for any clash reports."
+  },
+  {
+    id: "ann_2",
+    title: "NST Summer Hackathon 2026 Registrations Open",
+    sender: "NST Developers Club",
+    role: "Club Lead",
+    date: "2026-06-01",
+    tag: "Events",
+    content: "Registrations are now open for the annual NST Summer Hackathon happening on June 10th! Solve real-world campus problems and win exciting cash prizes up to $2,500. Form teams of 2-4. Registrations close on June 8th at 11:59 PM."
+  },
+  {
+    id: "ann_3",
+    title: "Placement Workshop: Technical Resume & Portfolio Reviews",
+    sender: "Career Cell Desk",
+    role: "Placement Admin",
+    date: "2026-05-31",
+    tag: "Placements",
+    content: "Join us this Friday at 3:00 PM in Seminar Hall 2 for a comprehensive resume writing and GitHub portfolio review workshop. Dr. Prasad and senior placement mentors will be sharing feedback. Mandatory for CSE and AIML students eligible for Summer 2027 internships."
+  }
+];
+
+export const initialEvents = [
+  {
+    id: "evt_1",
+    title: "ICPC Preparation & Advanced Graphs Session",
+    organizer: "Competitive Programming Hub",
+    date: "June 3, 2026",
+    time: "4:00 PM - 6:00 PM",
+    location: "Lab Room 402",
+    tag: "Coding",
+    rsvps: 45,
+    joined: false
+  },
+  {
+    id: "evt_2",
+    title: "Hands-on Arduino & Sensor Calibration Workshop",
+    organizer: "Robotics & Hardware Club",
+    date: "June 5, 2026",
+    time: "2:00 PM - 5:00 PM",
+    location: "Makerspace Hall A",
+    tag: "Hardware",
+    rsvps: 28,
+    joined: false
+  },
+  {
+    id: "evt_3",
+    title: "Collegiate Career Fair & Networking Summit",
+    organizer: "Career Services & Placements",
+    date: "June 8, 2026",
+    time: "10:00 AM - 4:00 PM",
+    location: "Main Exhibition Arena",
+    tag: "Careers",
+    rsvps: 180,
+    joined: true
+  }
+];
+
+export const initialCommunities = [
+  {
+    id: "comm_1",
+    name: "Robotics & Hardware Club",
+    description: "Designing autonomous UAVs, IoT sensors, and micro-controlled nodes.",
+    members: 142,
+    activity: "9+ updates today",
+    avatar: "🤖"
+  },
+  {
+    id: "comm_2",
+    name: "Google Developer Student Clubs (GDSC)",
+    description: "Official developer chapter on campus. Workshops, cloud studies, and solutions.",
+    members: 318,
+    activity: "4+ updates today",
+    avatar: "⚡"
+  },
+  {
+    id: "comm_3",
+    name: "Competitive Programming Hub",
+    description: "Weekly contests, DSA walkthroughs, and code optimizations.",
+    members: 195,
+    activity: "15+ updates today",
+    avatar: "📈"
+  }
+];
+
+export const initialActivityFeed = [
+  {
+    id: "feed_1",
+    userName: "Priya Patel",
+    userAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Priya",
+    userRole: "Student",
+    userTag: "AIML '27",
+    time: "2 hours ago",
+    content: "Just finished implementing a custom Graph Convolutional Network (GCN) for class recommendation. The accuracy on the college course dataset hit 84%! Huge thanks to Dr. Prasad for steering me away from over-parameterized layers. 🚀",
+    likes: 24,
+    comments: 6,
+    hasLiked: false
+  },
+  {
+    id: "feed_2",
+    userName: "Dr. A. K. Prasad",
+    userAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=Dr+Prasad",
+    userRole: "Faculty",
+    userTag: "Professor",
+    time: "5 hours ago",
+    content: "Reminder to all students enrolled in CSE-202 (Data Structures & Algorithms): Your mid-term assignments must be committed to your university GitHub repositories by tomorrow night. Ensure your tests pass, and do not copy-paste code. We run automated plagiarism checkers.",
+    likes: 38,
+    comments: 11,
+    hasLiked: false
+  },
+  {
+    id: "feed_3",
+    userName: "Newton School Developers Club",
+    userAvatar: "https://api.dicebear.com/7.x/identicon/svg?seed=NSTAdmin",
+    userRole: "Club",
+    userTag: "Clubs",
+    time: "1 day ago",
+    content: "Congrats to our student team for securing 3rd place in the National Smart India Hackathon! They built a decentralized ledger tool to verify academic transcripts in under 3 seconds. Check out their demo at our next dev show-and-tell this Thursday.",
+    likes: 52,
+    comments: 4,
+    hasLiked: true
+  }
+];
+
+export const initialSchedule = [
+  { id: "sch_1", time: "09:30 AM", title: "Artificial Intelligence & Logic", subtitle: "Lec - Dr. Prasad", room: "Room 301" },
+  { id: "sch_2", time: "11:00 AM", title: "Data Structures & Algorithms Lab", subtitle: "Lab - Room 402", room: "Lab A" },
+  { id: "sch_3", time: "02:30 PM", title: "Robotics Club Project Sync", subtitle: "Club meeting", room: "Makerspace" }
+];
+
+export const initialDeadlines = [
+  { id: "dead_1", title: "DBMS Assignment 2", course: "Database Systems", due: "In 2 days", severity: "high" },
+  { id: "dead_2", title: "GNN Project Draft", course: "AI/ML Elective", due: "In 4 days", severity: "medium" },
+  { id: "dead_3", title: "Hackathon Registration", course: "NST Club Devs", due: "In 6 days", severity: "low" }
+];
+
+export const initialTrending = [
+  { id: "tr_1", name: "hackathon-2026", count: 86 },
+  { id: "tr_2", name: "dsa-questions", count: 54 },
+  { id: "tr_3", name: "placement-cell", count: 49 },
+  { id: "tr_4", name: "memes", count: 32 }
+];
+
