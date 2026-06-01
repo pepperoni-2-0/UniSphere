@@ -796,50 +796,7 @@ const MainAppLayout = () => {
           </div>
         </div>
 
-        {/* Recent DMs / Direct Chats */}
-        <div className="quick-glance-section">
-          <div className="section-title-row">
-            <MessageSquare size={16} className="glance-title-icon" />
-            <span className="glance-title-text">Recent DMs</span>
-          </div>
-          <div className="glance-dms-list">
-            {users.filter(u => u.id !== currentUser.id).slice(0, 3).map(u => (
-              <button 
-                key={u.id} 
-                onClick={() => handleDMSelect(u.id)}
-                className="glance-dm-item-row"
-              >
-                <div className="avatar-status-wrapper">
-                  <img src={u.avatar} alt={u.name} className="glance-dm-avatar" />
-                  <span className={`status-indicator-dot ${u.status}`}></span>
-                </div>
-                <div className="glance-dm-details">
-                  <span className="glance-dm-name">{u.name}</span>
-                  <span className="glance-dm-desc">{u.customStatusText || u.branch || 'Offline'}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
 
-        {/* Trending Channels */}
-        <div className="quick-glance-section">
-          <div className="section-title-row">
-            <TrendingUp size={16} className="glance-title-icon" />
-            <span className="glance-title-text">Trending Channels</span>
-          </div>
-          <div className="trending-channels-list">
-            {trending.map(tr => (
-              <div key={tr.id} className="trending-channel-row">
-                <div className="tr-chan-left">
-                  <Hash size={14} className="tr-hash" />
-                  <span className="tr-name">{tr.name}</span>
-                </div>
-                <span className="tr-count">{tr.count} active</span>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* 5. RIGHT SIDEBAR THREAD DRAWER (Toggled when a message thread is open) */}
