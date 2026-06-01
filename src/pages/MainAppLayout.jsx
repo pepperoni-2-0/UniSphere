@@ -25,7 +25,8 @@ import {
   FileText,
   TrendingUp,
   Smile,
-  CornerDownRight
+  CornerDownRight,
+  X
 } from 'lucide-react';
 import './MainAppLayout.css';
 
@@ -68,6 +69,8 @@ const MainAppLayout = () => {
   const [newChannelName, setNewChannelName] = useState('');
   const [newChannelCategory, setNewChannelCategory] = useState('Academic');
   const [showCreateChannel, setShowCreateChannel] = useState(false);
+  const [showMembersModal, setShowMembersModal] = useState(false);
+  const [membersSearch, setMembersSearch] = useState('');
   
   // Message composing state
   const [chatInput, setChatInput] = useState('');
@@ -382,15 +385,27 @@ const MainAppLayout = () => {
             <span className="breadcrumb-divider">/</span>
             <span className="view-title-active">{activeTab === 'Channel' ? `#${activeChannel?.name}` : activeTab}</span>
           </div>
-          <div className="header-search">
-            <Search size={16} className="search-box-icon" />
-            <input 
-              type="text" 
-              placeholder="Search announcements, events, feeds..." 
-              value={dashboardSearch}
-              onChange={(e) => setDashboardSearch(e.target.value)}
-              className="search-box-input"
-            />
+          <div className="header-right-container">
+            {activeTab === 'Channel' && (
+              <button className="members-btn-pill" onClick={() => setShowMembersModal(true)}>
+                <div className="members-avatars-overlap">
+                  {users.slice(0, 3).map((u, i) => (
+                    <img key={u.id} src={u.avatar} alt={u.name} className="overlap-avatar" style={{ zIndex: 3 - i }} />
+                  ))}
+                </div>
+                <span className="members-count">{users.length}</span>
+              </button>
+            )}
+            <div className="header-search">
+              <Search size={16} className="search-box-icon" />
+              <input 
+                type="text" 
+                placeholder="Search announcements, events, feeds..." 
+                value={dashboardSearch}
+                onChange={(e) => setDashboardSearch(e.target.value)}
+                className="search-box-input"
+              />
+            </div>
           </div>
         </div>
 
@@ -905,6 +920,52 @@ const MainAppLayout = () => {
                 <button type="submit" className="btn-primary">Create</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 7. MEMBERS MODAL */}
+      {showMembersModal && (
+        <div className="modal-overlay flex-center">
+          <div className="modal-card members-modal">
+            <div className="members-modal-header">
+              <div>
+                <h3 className="modal-title"># {activeChannel?.name}</h3>
+                <div className="members-modal-tabs">
+                  <span className="members-tab-active">Members {users.length}</span>
+                </div>
+              </div>
+              <button className="modal-close-btn" onClick={() => setShowMembersModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="members-search-bar">
+              <Search size={16} className="search-box-icon" />
+              <input 
+                type="text"
+                placeholder="Find members"
+                value={membersSearch}
+                onChange={(e) => setMembersSearch(e.target.value)}
+                className="members-search-input"
+              />
+            </div>
+            
+            <div className="members-list-scrollable">
+              <div className="add-people-row">
+                <div className="add-people-icon"><Users size={16} /></div>
+                <span>Add people</span>
+              </div>
+              {users.filter(u => u.name.toLowerCase().includes(membersSearch.toLowerCase())).map(u => (
+                <div key={u.id} className="member-list-item">
+                  <img src={u.avatar} alt={u.name} className="member-list-avatar" />
+                  <div className="member-list-info">
+                    <span className="member-list-name">{u.name}</span>
+                    <span className="member-list-desc">{u.role === 'student' ? 'Student' : u.role === 'faculty' ? 'Faculty' : 'Admin'}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
