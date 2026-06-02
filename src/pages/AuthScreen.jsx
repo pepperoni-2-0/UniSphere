@@ -9,12 +9,14 @@ import {
   Briefcase, 
   MessageSquare, 
   Lock, 
-  CheckCircle 
+  CheckCircle,
+  Sun,
+  Moon
 } from 'lucide-react';
 import './AuthScreen.css';
 
 const AuthScreen = () => {
-  const { loginUser } = useAppContext();
+  const { loginUser, theme, toggleTheme } = useAppContext();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -116,8 +118,16 @@ const AuthScreen = () => {
           </div>
         </main>
 
-        <footer className="auth-column-footer">
+        <footer className="auth-column-footer" style={{ justifyContent: 'space-between', width: '100%' }}>
           <span>© 2024 UniSphere. All rights reserved.</span>
+          <button 
+            type="button" 
+            onClick={toggleTheme} 
+            className="theme-toggle-btn"
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
         </footer>
       </div>
 

@@ -42,10 +42,44 @@
   --font-serif: 'Lora', Georgia, serif;
 }
 
+body.dark-mode {
+  /* Dark Theme Counterpart - Neutral Dark (Notion/Linear/GitHub style) */
+  --bg-deep: #0F1115;         /* Deep Slate Black */
+  --bg-surface: #151922;      /* Sidebar Grey-Blue */
+  --bg-surface-hover: #222937;
+  --bg-surface-elevated: #1C212C; /* Card Surfaces */
+
+  --accent-primary: #4E8B62;  /* Accent Green */
+  --accent-primary-hover: #5DA574;
+  --accent-subtle: rgba(78, 139, 98, 0.08);
+  --accent-sage: #86A88E;
+
+  --text-primary: #F5F7FA;    /* Primary Off-white */
+  --text-secondary: #A0A9B8;  /* Secondary Muted Grey */
+  --text-tertiary: #6C7A8E;
+
+  --border-subtle: #2B3240;   /* Borders */
+  --border-focus: #4E8B62;
+
+  /* Overwrites for dark feedback/glass components */
+  --success: #6BB77B;
+  --warning: #E8B04B;
+  --error: #D96C6C;
+  --error-bg: rgba(217, 108, 108, 0.12);
+  --glass-bg: rgba(28, 33, 44, 0.85);
+  --glass-border: rgba(43, 50, 64, 0.5);
+  --shadow-glow: 0 0 20px rgba(78, 139, 98, 0.02);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* Global Transition for smooth theme slides */
+html, body, *, input, textarea, select, button {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 html, body {

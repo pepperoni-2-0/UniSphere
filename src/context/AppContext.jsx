@@ -45,6 +45,35 @@ export function AppProvider({ children }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [systemAccent, setSystemAccent] = useState(() => getStored("systemAccent", "emerald")); // emerald, teal, mint, steel
 
+  // Dark/Light Theme State
+  const [theme, setTheme] = useState(() => {
+    try {
+      const storedTheme = localStorage.getItem("unisphere_theme");
+      if (storedTheme) return JSON.parse(storedTheme);
+    } catch (e) {
+      console.error(e);
+    }
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
+
+  // Sync theme class on body and storage
+  useEffect(() => {
+    if (theme === "dark") {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
+    try {
+      localStorage.setItem("unisphere_theme", JSON.stringify(theme));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === "dark" ? "light" : "dark");
+  };
+
   // Dashboard & Collegiate States
   const [announcements, setAnnouncements] = useState(() => getStored("announcements", initialAnnouncements));
   const [events, setEvents] = useState(() => getStored("events", initialEvents));
@@ -496,7 +525,9 @@ export function AppProvider({ children }) {
         deadlines,
         setDeadlines,
         trending,
-        setTrending
+        setTrending,
+        theme,
+        toggleTheme
       }}
     >
       {children}

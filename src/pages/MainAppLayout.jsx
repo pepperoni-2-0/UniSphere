@@ -26,7 +26,8 @@ import {
   TrendingUp,
   Smile,
   CornerDownRight,
-  X
+  Sun,
+  Moon
 } from 'lucide-react';
 import './MainAppLayout.css';
 
@@ -62,7 +63,9 @@ const MainAppLayout = () => {
     activeThreadParentId,
     setActiveThreadParentId,
     threadReplies,
-    sendThreadReply
+    sendThreadReply,
+    theme,
+    toggleTheme
   } = useAppContext();
 
   const [activeTab, setActiveTab] = useState('Home'); // Home, Announcements, Events, Placements, Communities, Messages, Profile, Settings, Channel
@@ -206,12 +209,12 @@ const MainAppLayout = () => {
       {/* 1. WORKSPACE SELECTOR VERTICAL STRIP (Far Left) */}
       <div className="workspace-switcher-strip">
         <div className="logo-strip-top">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="7" r="4.5" stroke="#FFFFFF" strokeWidth="2.5" fill="none" />
-            <circle cx="6" cy="16" r="4.5" stroke="#FFFFFF" strokeWidth="2.5" fill="none" />
-            <circle cx="18" cy="16" r="4.5" stroke="#FFFFFF" strokeWidth="2.5" fill="none" />
-            <line x1="12" y1="11.5" x2="8.5" y2="13.5" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
-            <line x1="12" y1="11.5" x2="15.5" y2="13.5" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="7" r="4.5" stroke="currentColor" strokeWidth="2.5" fill="none" />
+            <circle cx="6" cy="16" r="4.5" stroke="currentColor" strokeWidth="2.5" fill="none" />
+            <circle cx="18" cy="16" r="4.5" stroke="currentColor" strokeWidth="2.5" fill="none" />
+            <line x1="12" y1="11.5" x2="8.5" y2="13.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <line x1="12" y1="11.5" x2="15.5" y2="13.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </div>
         <div className="workspace-icons-container">
@@ -224,7 +227,6 @@ const MainAppLayout = () => {
                 setActiveTab('Home');
               }}
               title={ws.name}
-              style={{ background: ws.logoBg }}
             >
               {ws.shortName}
             </button>
@@ -366,12 +368,22 @@ const MainAppLayout = () => {
         </div>
 
         {/* User profile capsule at sidebar bottom */}
-        <div className="sidebar-user-footer">
-          <img src={currentUser?.avatar} alt={currentUser?.name} className="user-footer-avatar" />
-          <div className="user-footer-info">
-            <span className="user-footer-name">{currentUser?.name}</span>
-            <span className="user-footer-status">● {currentUser?.customStatusText || 'Online'}</span>
+        <div className="sidebar-user-footer" style={{ justifyContent: 'space-between' }}>
+          <div className="user-footer-left" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
+            <img src={currentUser?.avatar} alt={currentUser?.name} className="user-footer-avatar" />
+            <div className="user-footer-info" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <span className="user-footer-name" style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{currentUser?.name}</span>
+              <span className="user-footer-status" style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>● {currentUser?.customStatusText || 'Online'}</span>
+            </div>
           </div>
+          <button 
+            type="button" 
+            onClick={toggleTheme} 
+            className="theme-toggle-btn-sidebar"
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
         </div>
       </div>
 
