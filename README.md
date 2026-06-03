@@ -1,4 +1,4 @@
-# 🌌 UniSphere — The Campus Collaboration & Social Network Hub
+# UniSphere — The Campus Collaboration & Social Network Hub
 
 **UniSphere** is a premium, high-fidelity React application designed as the "Operating System for Modern Campus Communities." It brings official announcements, student communities, academics, faculty communication, events, clubs, and placement drives into a unified, interactive workspace.
 
@@ -6,7 +6,7 @@ UniSphere is built with **React 19**, **Vite 8**, **Lucide Icons**, and custom u
 
 ---
 
-## 🎨 Design System & Aesthetics
+##  Design System & Aesthetics
 
 UniSphere features a highly customized, premium visual design crafted to represent academic spaces with a modern digital twist:
 
@@ -29,7 +29,7 @@ UniSphere features a highly customized, premium visual design crafted to represe
 
 ---
 
-## 🚀 Key Features & Pillars
+##  Key Features & Pillars
 
 ### 1. Multi-Workspace Switcher
 *   Allows switching between multiple campus network nodes (e.g., **Newton School of Technology**, **IIT Delhi**, **BITS Pilani**).
@@ -66,7 +66,7 @@ UniSphere features a highly customized, premium visual design crafted to represe
 
 ---
 
-## 📂 Project Architecture
+## Project Architecture
 
 ```
 UniSphere/
@@ -92,7 +92,7 @@ UniSphere/
 ```
 ---
 
-## 🛠️ Setup & Local Installation
+##  Setup & Local Installation
 
 ### Prerequisites
 Make sure you have [Node.js](https://nodejs.org/) installed (v18+ recommended).
@@ -122,7 +122,7 @@ Make sure you have [Node.js](https://nodejs.org/) installed (v18+ recommended).
 
 ---
 
-## 🔒 License & Verification
+##  License & Verification
 
 *   **Design & Engineering:** Developed with custom hand-crafted UI variables and layout structure.
 *   **Verification:** Verified production build compatibility under Node compiler profiles.
