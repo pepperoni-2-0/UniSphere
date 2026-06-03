@@ -27,7 +27,8 @@ import {
   Smile,
   CornerDownRight,
   Sun,
-  Moon
+  Moon,
+  X
 } from 'lucide-react';
 import './MainAppLayout.css';
 
