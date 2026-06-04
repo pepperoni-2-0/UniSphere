@@ -4186,3 +4186,666 @@ body.dark-mode .chat-message-row.pinned-message {
 .online-peer-row:hover {
   background-color: var(--bg-surface-hover);
 }
+
+/* ========================================== */
+/* INSTAGRAM-FIRST REDESIGN STYLES            */
+/* ========================================== */
+
+/* Social Mode Central Feed Container */
+.social-mode-container {
+  max-width: 620px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* 1. Circular Stories track */
+.instagram-stories-container {
+  width: 100%;
+  overflow-x: auto;
+  padding: 0.75rem 0.25rem 0.25rem 0.25rem;
+  scrollbar-width: none; /* Firefox */
+}
+.instagram-stories-container::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+.instagram-stories-track {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.instagram-story-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  text-align: center;
+  transition: transform 0.15s ease;
+}
+
+.instagram-story-item:hover {
+  transform: scale(1.04);
+}
+
+.instagram-story-ring {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  padding: 2.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: var(--bg-surface);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.instagram-story-ring.normal-story {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+.instagram-story-ring.close-friend {
+  background: linear-gradient(135deg, #42b72a, #2e7d32); /* Premium close friends green */
+}
+
+.instagram-story-ring.your-story {
+  background: var(--border-subtle);
+  border: 1px solid var(--border-subtle);
+}
+
+.instagram-story-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--bg-surface);
+  background: var(--bg-surface-elevated);
+}
+
+.instagram-story-avatar-emoji {
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-surface-hover);
+  border-radius: 50%;
+  border: 2px solid var(--bg-surface);
+}
+
+.instagram-story-plus {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: var(--accent-primary);
+  color: #FFFFFF;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--bg-surface);
+}
+
+.instagram-story-label {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  max-width: 68px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* 2. Simplified Instagram Post Publisher */
+.instagram-create-post-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.instagram-composer-header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.instagram-composer-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-subtle);
+}
+
+.instagram-composer-textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  resize: none;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  outline: none;
+  padding-top: 0.35rem;
+  line-height: 1.45;
+}
+
+.instagram-composer-textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+.instagram-composer-attachment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.composer-template-selector-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.composer-template-selector-label {
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.template-graphic-pills {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.template-graphic-pill {
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.template-graphic-pill:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+  border-color: var(--text-tertiary);
+}
+
+.template-graphic-pill.active {
+  background: var(--accent-subtle);
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.instagram-composer-submit-btn {
+  background-color: var(--accent-primary);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.instagram-composer-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 3. Instagram Feed Stream & Cards */
+.instagram-feed-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.instagram-feed-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.instagram-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.instagram-card-author-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.instagram-card-author-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-subtle);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.instagram-card-author-avatar:hover {
+  transform: scale(1.03);
+}
+
+.instagram-card-author-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.instagram-card-author-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.instagram-card-author-name:hover {
+  text-decoration: underline;
+}
+
+.instagram-card-author-sub {
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+  margin-top: 0.05rem;
+}
+
+.instagram-card-timestamp {
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+
+.instagram-card-media {
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg-deep);
+}
+
+.instagram-media-img {
+  width: 100%;
+  max-height: 480px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Fallback for text-only posts (Threads inspired style) */
+.instagram-card-text-fallback {
+  background: linear-gradient(135deg, var(--bg-surface-elevated), var(--bg-deep));
+  padding: 2.25rem 1.75rem;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.instagram-card-text-fallback p {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--text-primary);
+  font-weight: 500;
+  font-family: var(--font-sans);
+  max-width: 90%;
+}
+
+/* Actions Row */
+.instagram-card-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem 0.5rem 1rem;
+}
+
+.instagram-actions-left {
+  display: flex;
+  gap: 1rem;
+}
+
+.instagram-action-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: transform 0.15s ease, color 0.15s ease;
+  display: flex;
+  align-items: center;
+}
+
+.instagram-action-btn:hover {
+  transform: scale(1.1);
+  color: var(--accent-primary);
+}
+
+.instagram-action-btn.liked:hover {
+  color: var(--error);
+}
+
+/* Likes Counter & Caption text */
+.instagram-card-likes-count {
+  padding: 0 1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.35rem;
+}
+
+.instagram-card-caption {
+  padding: 0 1rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.instagram-caption-username {
+  font-weight: 700;
+  margin-right: 0.45rem;
+}
+
+.instagram-caption-text {
+  color: var(--text-secondary);
+}
+
+.instagram-card-comments-toggle {
+  padding: 0 1rem 0.75rem 1rem;
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.instagram-card-comments-toggle:hover {
+  color: var(--text-secondary);
+}
+
+/* Drawer comments container */
+.instagram-card-comments-section {
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-surface-elevated);
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.instagram-comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-height: 220px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.instagram-comment-item {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+}
+
+.instagram-comment-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.instagram-comment-text-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.instagram-comment-text-row {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.instagram-comment-username {
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-right: 0.35rem;
+}
+
+.instagram-comment-text {
+  color: var(--text-secondary);
+}
+
+.instagram-comment-time {
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+}
+
+.instagram-comment-composer {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.instagram-comment-input {
+  flex: 1;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 18px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.instagram-comment-submit-btn {
+  background: transparent;
+  border: none;
+  color: var(--accent-primary);
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  padding: 0 0.5rem;
+}
+
+.instagram-comment-submit-btn:hover {
+  color: var(--accent-primary-hover);
+}
+
+/* 4. Instagram Notifications layout */
+.instagram-notification-item {
+  transition: background-color 0.15s ease;
+}
+
+.instagram-notification-item:hover {
+  background-color: var(--bg-surface-hover);
+}
+
+/* 5. Instagram Profile layout */
+.portfolio-item-tile {
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.portfolio-item-tile:hover {
+  transform: scale(1.01);
+}
+
+.portfolio-tile-hover-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.9rem;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.portfolio-item-tile:hover .portfolio-tile-hover-overlay {
+  opacity: 1;
+}
+
+/* 6. Instagram Suggestions Sidebar (Right Sidebar) */
+.instagram-right-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.25rem 0.5rem;
+}
+
+.instagram-sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.instagram-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.25rem;
+  border-bottom: 1.5px solid var(--border-subtle);
+}
+
+.instagram-section-header span {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.see-all-btn {
+  background: none;
+  border: none;
+  color: var(--accent-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.see-all-btn:hover {
+  text-decoration: underline;
+}
+
+.instagram-suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.instagram-suggestion-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0;
+}
+
+.suggestion-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.suggestion-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.suggestion-club-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--accent-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.suggestion-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.suggestion-username {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.suggestion-subtext {
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  margin-top: 0.05rem;
+}
+
+.suggestion-action-btn {
+  background: transparent;
+  border: none;
+  color: var(--accent-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  transition: all 0.15s ease;
+}
+
+.suggestion-action-btn:hover {
+  color: var(--accent-primary-hover);
+}
+
+.suggestion-action-btn.following,
+.suggestion-action-btn.joined {
+  color: var(--text-tertiary);
+}
