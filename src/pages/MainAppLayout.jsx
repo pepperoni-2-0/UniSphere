@@ -33,6 +33,7 @@ import {
   Lock,
   Pin,
   Trash2,
+  Bookmark,
   X
 } from 'lucide-react';
 import './MainAppLayout.css';
@@ -86,7 +87,8 @@ const MainAppLayout = () => {
     saveFeedPost,
     addCommentToPost,
     createFeedPost,
-    toggleJoinClub
+    toggleJoinClub,
+    notifications
   } = useAppContext();
 
   const [activeTab, setActiveTab] = useState('Home'); // Home, Announcements, Events, Placements, Communities, Messages, Profile, Settings, Channel, Directory, Console
@@ -99,6 +101,7 @@ const MainAppLayout = () => {
   // Campus Feed specific states
   const [appMode, setAppMode] = useState('workspace'); // workspace, social
   const [activeSocialTab, setActiveSocialTab] = useState('feed'); // feed, explore, messages, profile
+  const [profileViewUser, setProfileViewUser] = useState(null);
   const [showModeDropdown, setShowModeDropdown] = useState(false);
   const [composerAttachedImage, setComposerAttachedImage] = useState(null); // url path
   const [selectedSocialPeerId, setSelectedSocialPeerId] = useState('user_aarav'); // default message peer
@@ -213,6 +216,26 @@ const MainAppLayout = () => {
       return post;
     }));
   };
+
+  const toggleFollowUser = (userId) => {
+    setFollowingIds(prev => 
+      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
+    );
+  };
+
+  const getProfileStats = (user) => {
+    if (!user) return { followers: 0, following: 0 };
+    if (user.id === 'user_rahul') return { followers: 412, following: 195 };
+    if (user.id === 'user_aarav') return { followers: 345, following: 210 };
+    if (user.id === 'user_priya') return { followers: 512, following: 180 };
+    const hash = user.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return {
+      followers: (hash % 300) + 120,
+      following: (hash % 150) + 80
+    };
+  };
+
+  const viewUser = profileViewUser || currentUser;
 
   // Format post content with clickable hashtags
   const formatPostContent = (content) => {
@@ -709,75 +732,45 @@ const MainAppLayout = () => {
                 className={`nav-tab-link ${activeSocialTab === 'feed' ? 'active' : ''}`} 
                 onClick={() => { setActiveSocialTab('feed'); setFeedFilter(''); }}
               >
-                <MessageSquare size={16} className="nav-tab-icon" />
-                <span>📱 Campus Feed</span>
+                <Home size={18} className="nav-tab-icon" />
+                <span>Home</span>
               </button>
               <button 
                 type="button"
                 className={`nav-tab-link ${activeSocialTab === 'explore' ? 'active' : ''}`} 
                 onClick={() => { setActiveSocialTab('explore'); setFeedFilter(''); }}
               >
-                <Search size={16} className="nav-tab-icon" />
-                <span>🔍 Explore Social</span>
+                <Search size={18} className="nav-tab-icon" />
+                <span>Explore</span>
               </button>
               <button 
                 type="button"
                 className={`nav-tab-link ${activeSocialTab === 'messages' ? 'active' : ''}`} 
                 onClick={() => { setActiveSocialTab('messages'); setFeedFilter(''); }}
               >
-                <MessageCircle size={16} className="nav-tab-icon" />
-                <span>💬 Peer DMs</span>
+                <MessageCircle size={18} className="nav-tab-icon" />
+                <span>Messages</span>
+              </button>
+              <button 
+                type="button"
+                className={`nav-tab-link ${activeSocialTab === 'notifications' ? 'active' : ''}`} 
+                onClick={() => { setActiveSocialTab('notifications'); setFeedFilter(''); }}
+              >
+                <Bell size={18} className="nav-tab-icon" />
+                <span>Notifications</span>
               </button>
               <button 
                 type="button"
                 className={`nav-tab-link ${activeSocialTab === 'profile' ? 'active' : ''}`} 
-                onClick={() => { setActiveSocialTab('profile'); setFeedFilter(''); }}
+                onClick={() => { 
+                  setProfileViewUser(currentUser);
+                  setActiveSocialTab('profile'); 
+                  setFeedFilter(''); 
+                }}
               >
-                <User size={16} className="nav-tab-icon" />
-                <span>👤 Student Profile</span>
+                <User size={18} className="nav-tab-icon" />
+                <span>Profile</span>
               </button>
-            </div>
-
-            {/* Social Sidebar Widgets: Close Friends */}
-            <div className="sidebar-shortcuts-section">
-              <span className="shortcuts-section-label">⭐ Close Friends Stories</span>
-              <div className="close-friends-sidebar-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                {[
-                  { id: "user_aarav", name: "Aarav Mehta", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav", status: "online", emoji: "🔬" },
-                  { id: "user_priya", name: "Priya Patel", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Priya", status: "online", emoji: "💼" }
-                ].map(friend => (
-                  <div 
-                    key={friend.id} 
-                    className={`shortcut-link ${selectedSocialPeerId === friend.id && activeSocialTab === 'messages' ? 'active-friend-tab' : ''}`}
-                    onClick={() => {
-                      setActiveSocialTab('messages');
-                      setSelectedSocialPeerId(friend.id);
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      cursor: 'pointer',
-                      padding: '0.4rem 0.5rem',
-                      borderRadius: '6px',
-                      background: selectedSocialPeerId === friend.id && activeSocialTab === 'messages' ? 'var(--accent-subtle)' : 'transparent'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <div style={{ position: 'relative', display: 'flex' }}>
-                        <img 
-                          src={friend.avatar} 
-                          alt={friend.name} 
-                          style={{ width: '24px', height: '24px', borderRadius: '50%', border: '2px solid #22c55e' }} 
-                        />
-                        <span style={{ position: 'absolute', bottom: -2, right: -2, width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#22c55e', border: '1.5px solid var(--bg-surface)' }}></span>
-                      </div>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: selectedSocialPeerId === friend.id && activeSocialTab === 'messages' ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>{friend.name}</span>
-                    </div>
-                    <span style={{ fontSize: '0.7rem' }}>{friend.emoji}</span>
-                  </div>
-                ))}
-              </div>
             </div>
           </>
         )}
@@ -786,7 +779,15 @@ const MainAppLayout = () => {
         <div 
           className="sidebar-user-footer" 
           style={{ justifyContent: 'space-between', cursor: 'pointer' }}
-          onClick={() => setSelectedProfileUser(currentUser)}
+          onClick={() => {
+            if (appMode === 'social') {
+              setProfileViewUser(currentUser);
+              setActiveSocialTab('profile');
+              setFeedFilter('');
+            } else {
+              setSelectedProfileUser(currentUser);
+            }
+          }}
         >
           <div className="user-footer-left" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
             <img src={currentUser?.avatar} alt={currentUser?.name} className="user-footer-avatar" />
@@ -854,13 +855,12 @@ const MainAppLayout = () => {
           {appMode === 'social' ? (
             <div className="social-mode-container" style={{ padding: '0 0.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               
-              {/* TAB: SOCIAL FEED */}
               {activeSocialTab === 'feed' && (
-                <div className="social-feed-tab-view" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div className="social-feed-tab-view">
                   
                   {/* Active Filter Indicator */}
                   {feedFilter && (
-                    <div className="active-filter-banner">
+                    <div className="active-filter-banner" style={{ marginBottom: '1rem' }}>
                       <div className="filter-badge-info">
                         <Filter size={14} />
                         <span>Showing posts matching <strong>{feedFilter}</strong></span>
@@ -871,13 +871,21 @@ const MainAppLayout = () => {
                     </div>
                   )}
 
-                  {/* Stories/Highlights Section */}
-                  <div className="moments-container">
-                    <h3 className="moments-header-title">Campus Highlights</h3>
-                    <div className="moments-track">
+                  {/* Circular Instagram Stories */}
+                  <div className="instagram-stories-container">
+                    <div className="instagram-stories-track">
+                      {/* Your Story */}
+                      <div className="instagram-story-item">
+                        <div className="instagram-story-ring your-story">
+                          <img src={currentUser?.avatar} alt="Your Story" className="instagram-story-avatar" />
+                          <span className="instagram-story-plus">+</span>
+                        </div>
+                        <span className="instagram-story-label">Your Story</span>
+                      </div>
+
                       {/* Close Friend 1 Story */}
                       <div 
-                        className="moment-card-wrapper" 
+                        className="instagram-story-item"
                         onClick={() => setSelectedMoment({
                           id: "moment_close_1",
                           title: "Makerspace UAV test",
@@ -887,21 +895,16 @@ const MainAppLayout = () => {
                           description: "Calibrated drone evasion sensors in the courtyard! Evasion works on tree-partitioning trees model. Pushed code changes on the main CP Hub files desk.",
                           views: 142
                         })}
-                        style={{ border: '3.5px solid #22c55e', background: 'linear-gradient(135deg, #059669, #022c22)' }}
                       >
-                        <div className="moment-gradient-overlay"></div>
-                        <div className="moment-content">
-                          <div className="moment-avatar-badge" style={{ borderColor: '#22c55e' }}>🔬</div>
-                          <div className="moment-meta">
-                            <h4 className="moment-title">Aarav (UAV Test)</h4>
-                            <span style={{ fontSize: '0.6rem', color: '#22c55e', fontWeight: 'bold' }}>⭐ Close Friend</span>
-                          </div>
+                        <div className="instagram-story-ring close-friend">
+                          <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav" alt="Aarav" className="instagram-story-avatar" />
                         </div>
+                        <span className="instagram-story-label">Aarav</span>
                       </div>
 
                       {/* Close Friend 2 Story */}
                       <div 
-                        className="moment-card-wrapper" 
+                        className="instagram-story-item"
                         onClick={() => setSelectedMoment({
                           id: "moment_close_2",
                           title: "Google AI Fellowship",
@@ -911,138 +914,77 @@ const MainAppLayout = () => {
                           description: "Secured the Google AI fellowship! Preparing resume guidelines and portfolio review guidelines to share with NST students.",
                           views: 298
                         })}
-                        style={{ border: '3.5px solid #22c55e', background: 'linear-gradient(135deg, #7c3aed, #1e1b4b)' }}
                       >
-                        <div className="moment-gradient-overlay"></div>
-                        <div className="moment-content">
-                          <div className="moment-avatar-badge" style={{ borderColor: '#22c55e' }}>💼</div>
-                          <div className="moment-meta">
-                            <h4 className="moment-title">Priya (AI Fellow)</h4>
-                            <span style={{ fontSize: '0.6rem', color: '#22c55e', fontWeight: 'bold' }}>⭐ Close Friend</span>
-                          </div>
+                        <div className="instagram-story-ring close-friend">
+                          <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Priya" alt="Priya" className="instagram-story-avatar" />
                         </div>
+                        <span className="instagram-story-label">Priya</span>
                       </div>
 
-                      {moments.map(moment => (
-                        <div 
-                          key={moment.id} 
-                          className="moment-card-wrapper" 
-                          onClick={() => setSelectedMoment(moment)}
-                          style={{ background: moment.coverBg }}
-                        >
-                          <div className="moment-gradient-overlay"></div>
-                          <div className="moment-content">
-                            <div className="moment-avatar-badge">{moment.avatar}</div>
-                            <div className="moment-meta">
-                              <h4 className="moment-title">{moment.title}</h4>
-                              <span className="moment-views">👁️ {moment.views} views</span>
+                      {moments.map(moment => {
+                        const name = moment.club.split(" NST")[0].split(" ")[0];
+                        return (
+                          <div 
+                            key={moment.id} 
+                            className="instagram-story-item" 
+                            onClick={() => setSelectedMoment(moment)}
+                          >
+                            <div className="instagram-story-ring normal-story">
+                              <span className="instagram-story-avatar-emoji">{moment.avatar}</span>
                             </div>
+                            <span className="instagram-story-label">{name}</span>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
 
-                  {/* Visual Post Composer Card */}
-                  <div className="create-post-card">
-                    <div className="create-post-tabs">
-                      {['update', 'achievement', 'event', 'placement'].map(t => (
-                        <button 
-                          key={t}
-                          type="button"
-                          className={`create-post-tab-btn ${composerType === t ? 'active' : ''}`} 
-                          onClick={() => setComposerType(t)}
-                        >
-                          {t === 'update' ? '💬 Casual Post' : t === 'achievement' ? '🏆 Achievement' : t === 'event' ? '📅 Event Photo' : '💼 Placement alert'}
-                        </button>
-                      ))}
-                    </div>
-
-                    <form onSubmit={handlePublishFeed} className="create-post-form">
-                      {composerType !== 'update' && (
-                        <div className="composer-banner-inputs">
-                          <input 
-                            type="text" 
-                            placeholder="Banner Title (e.g. UAV drone evasion)" 
-                            value={composerTitle} 
-                            onChange={(e) => setComposerTitle(e.target.value)}
-                            className="composer-input-field"
-                            required
-                          />
-                          <input 
-                            type="text" 
-                            placeholder="Sub-text (e.g. Rank #7 CP / Monday 4:00 PM)" 
-                            value={composerSubtitle} 
-                            onChange={(e) => setComposerSubtitle(e.target.value)}
-                            className="composer-input-field"
-                            required
-                          />
-                        </div>
-                      )}
-
-                      <textarea 
-                        placeholder={
-                          composerType === 'achievement' ? "Describe your achievement! We qualified for CP regionals! #ICPCRegionals" :
-                          composerType === 'event' ? "Share your event updates! GDSC Android compose workshop slides are live. #GDSC" :
-                          composerType === 'placement' ? "Placement alerts: Stipends, eligibility details, resume reviews. #PlacementCell" :
-                          "What's happening on campus today? Share event photos, jokes, coding project showcases... use #hashtags!"
-                        }
-                        value={feedInput}
-                        onChange={(e) => setFeedInput(e.target.value)}
-                        className="composer-textarea"
-                        required
-                      />
-
-                      {/* Attached Image Preview */}
-                      {composerAttachedImage && (
-                        <div className="composer-image-preview-box" style={{ position: 'relative', width: '100%', height: '180px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-subtle)', marginTop: '0.25rem' }}>
-                          <img src={composerAttachedImage} alt="Attached preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          <button 
-                            type="button" 
-                            className="composer-remove-image-btn" 
-                            onClick={() => setComposerAttachedImage(null)}
-                            style={{ position: 'absolute', top: '8px', right: '8px', backgroundColor: 'rgba(15,17,21,0.7)', border: 'none', color: '#FFFFFF', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Image Attachment Quick Templates Selector */}
-                      <div className="composer-quick-images-row" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Attach Graphic:</span>
-                        {[
-                          { name: '🛠️ Drone', path: '/assets/robotics_drone.png' },
-                          { name: '🎸 Festival', path: '/assets/campus_festival.png' },
-                          { name: '🌱 IoT Garden', path: '/assets/project_showcase.png' },
-                          { name: '💡 Meme', path: '/assets/coder_meme.png' }
-                        ].map(img => (
-                          <button 
-                            key={img.path}
-                            type="button" 
-                            onClick={() => setComposerAttachedImage(img.path)}
-                            className="composer-quick-image-pill"
-                            style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid var(--border-subtle)', background: composerAttachedImage === img.path ? 'var(--accent-subtle)' : 'var(--bg-deep)', fontSize: '0.72rem', cursor: 'pointer', color: composerAttachedImage === img.path ? 'var(--accent-primary)' : 'var(--text-secondary)', fontWeight: 600 }}
-                          >
-                            {img.name}
-                          </button>
-                        ))}
+                  {/* Visual Post Composer (Instagram style) */}
+                  <div className="instagram-create-post-card">
+                    <form onSubmit={handlePublishFeed} className="instagram-create-post-form">
+                      <div className="instagram-composer-header">
+                        <img src={currentUser?.avatar} alt="Me" className="instagram-composer-avatar" />
+                        <textarea 
+                          placeholder="What's happening on campus? Share a project, event, or memory..." 
+                          value={feedInput} 
+                          onChange={(e) => setFeedInput(e.target.value)}
+                          className="instagram-composer-textarea"
+                          rows={3}
+                          required
+                        />
                       </div>
-
-                      <div className="composer-bottom-row">
-                        <span className="composer-info-text">
-                          Posting as <strong>{currentUser?.name}</strong> • Student
-                        </span>
-                        <button type="submit" className="composer-submit-btn">
-                          <span>Post Social Feed</span>
-                          <Plus size={14} />
+                      
+                      <div className="instagram-composer-attachment-row">
+                        <div className="composer-template-selector-box">
+                          <span className="composer-template-selector-label">Attach Graphic:</span>
+                          <div className="template-graphic-pills">
+                            {[
+                              { label: "🛸 Drone", img: "/assets/robotics_drone.png" },
+                              { label: "🎉 Fest", img: "/assets/campus_festival.png" },
+                              { label: "💻 Code Meme", img: "/assets/coder_meme.png" },
+                              { label: "⚙️ Project", img: "/assets/project_showcase.png" }
+                            ].map(item => (
+                              <button 
+                                key={item.label}
+                                type="button"
+                                className={`template-graphic-pill ${composerAttachedImage === item.img ? 'active' : ''}`}
+                                onClick={() => setComposerAttachedImage(composerAttachedImage === item.img ? null : item.img)}
+                              >
+                                {item.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <button type="submit" className="instagram-composer-submit-btn" disabled={!feedInput.trim() && !composerAttachedImage}>
+                          Post
                         </button>
                       </div>
                     </form>
                   </div>
 
-                  {/* Visual Post Cards Stream */}
-                  <div className="social-feed-container">
+                  {/* Centered Instagram Feed Card stream */}
+                  <div className="instagram-feed-container">
                     {filteredFeedPosts.length === 0 ? (
                       <div style={{ padding: '2rem', textAlign: 'center', backgroundColor: 'var(--bg-surface-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '12px' }}>
                         <p style={{ color: 'var(--text-secondary)' }}>No social posts found matching search.</p>
@@ -1051,152 +993,141 @@ const MainAppLayout = () => {
                       filteredFeedPosts.map(post => {
                         const isExpanded = expandedComments[post.id];
                         const commentText = commentInputs[post.id] || '';
+                        const hasLiked = post.hasLiked;
+                        const hasSaved = post.hasSaved;
                         return (
-                          <div key={post.id} className="feed-post-card">
+                          <div key={post.id} className="instagram-feed-card">
                             
                             {/* Card Header */}
-                            <div className="post-header-row">
-                              <div className="post-author-block">
+                            <div className="instagram-card-header">
+                              <div className="instagram-card-author-info">
                                 <img 
                                   src={post.userAvatar} 
                                   alt={post.userName} 
-                                  className="post-author-avatar" 
+                                  className="instagram-card-author-avatar" 
                                   onClick={() => {
                                     const authorUser = users.find(u => u.id === post.userId) || { name: post.userName, avatar: post.userAvatar, role: 'student', branch: post.department };
                                     setSelectedProfileUser(authorUser);
                                   }}
                                 />
-                                <div className="post-author-meta">
-                                  <div className="post-author-name-row">
-                                    <span 
-                                      className="post-author-name"
-                                      onClick={() => {
-                                        const authorUser = users.find(u => u.id === post.userId) || { name: post.userName, avatar: post.userAvatar, role: 'student', branch: post.department };
-                                        setSelectedProfileUser(authorUser);
-                                      }}
-                                    >
-                                      {post.userName}
-                                    </span>
-                                    <div className="post-role-badges">
-                                      {(post.userRoleIds || []).map(rId => {
-                                        const rDef = roles[rId];
-                                        if (!rDef) return null;
-                                        return (
-                                          <span key={rId} className={`academic-badge-chip ${rDef.colorClass}`} style={{ fontSize: '0.62rem', padding: '1px 5px', borderRadius: '4px' }}>
-                                            {rDef.badgeLabel}
-                                          </span>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                  <div className="post-dept-row">
-                                    {post.department}
-                                  </div>
+                                <div className="instagram-card-author-text">
+                                  <span 
+                                    className="instagram-card-author-name"
+                                    onClick={() => {
+                                      const authorUser = users.find(u => u.id === post.userId) || { name: post.userName, avatar: post.userAvatar, role: 'student', branch: post.department };
+                                      setSelectedProfileUser(authorUser);
+                                    }}
+                                  >
+                                    {post.userName}
+                                  </span>
+                                  <span className="instagram-card-author-sub">{post.department} • Batch {post.userId === 'user_rahul' || post.userName.includes('Rahul') ? "'26" : "'27"}</span>
                                 </div>
                               </div>
-                              <span className="post-time-stamp">{post.time}</span>
+                              <span className="instagram-card-timestamp">{post.time}</span>
                             </div>
 
-                            {/* Body content */}
-                            <div className="post-body-content">
-                              <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{formatPostContent(post.content)}</p>
-                            </div>
-
-                            {/* Visual Post Image Attachment (High visual focus) */}
-                            {post.image && (
-                              <div className="post-image-attachment-box" style={{ width: '100%', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-subtle)', background: 'var(--bg-deep)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <img src={post.image} alt="Visual Attachment" style={{ width: '100%', height: 'auto', objectFit: 'contain', transition: 'transform 0.3s ease' }} className="visual-post-img" />
+                            {/* Media content */}
+                            {post.image ? (
+                              <div className="instagram-card-media">
+                                <img src={post.image} alt="Visual Attachment" className="instagram-media-img" />
+                              </div>
+                            ) : (
+                              <div className="instagram-card-text-fallback">
+                                <p>{post.content}</p>
                               </div>
                             )}
 
-                            {/* Banner details */}
-                            {post.bannerTitle && (
-                              <div className="premium-post-banner" style={{ background: post.bannerColor || 'linear-gradient(135deg, #1e3a8a, #0f172a)' }}>
-                                <div className="banner-emoji-box">
-                                  {post.bannerEmoji || '🏆'}
-                                </div>
-                                <div className="banner-text-details">
-                                  <span className="banner-title-label">{post.bannerTitle}</span>
-                                  <span className="banner-subtitle-label">{post.bannerSubtitle}</span>
-                                </div>
+                            {/* Actions Row */}
+                            <div className="instagram-card-actions-bar">
+                              <div className="instagram-actions-left">
+                                <button 
+                                  type="button" 
+                                  className={`instagram-action-btn ${hasLiked ? 'liked' : ''}`}
+                                  onClick={() => likeFeedPost(post.id)}
+                                  title="Like"
+                                >
+                                  <Heart size={20} fill={hasLiked ? "var(--error)" : "none"} color={hasLiked ? "var(--error)" : "currentColor"} />
+                                </button>
+                                <button 
+                                  type="button" 
+                                  className="instagram-action-btn"
+                                  onClick={() => toggleCommentsSection(post.id)}
+                                  title="Comment"
+                                >
+                                  <MessageCircle size={20} />
+                                </button>
+                                <button 
+                                  type="button" 
+                                  className="instagram-action-btn"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(post.content);
+                                    alert('Post content copied!');
+                                  }}
+                                  title="Share"
+                                >
+                                  <Send size={20} />
+                                </button>
                               </div>
-                            )}
-
-                            <div className="post-actions-divider"></div>
-
-                            {/* Post Actions row */}
-                            <div className="post-actions-row">
                               <button 
-                                type="button"
-                                className={`post-action-button ${post.hasLiked ? 'active-liked' : ''}`}
-                                onClick={() => likeFeedPost(post.id)}
-                              >
-                                <ThumbsUp size={14} />
-                                <span>{post.likes} Likes</span>
-                              </button>
-                              <button 
-                                type="button"
-                                className="post-action-button"
-                                onClick={() => toggleCommentsSection(post.id)}
-                              >
-                                <MessageCircle size={14} />
-                                <span>{post.commentsCount || 0} Comments</span>
-                              </button>
-                              <button 
-                                type="button"
-                                className="post-action-button"
-                                onClick={() => {
-                                  navigator.clipboard.writeText(post.content);
-                                  alert('Post content copied!');
-                                }}
-                              >
-                                <Send size={14} />
-                                <span>Share</span>
-                              </button>
-                              <button 
-                                type="button"
-                                className={`post-action-button ${post.hasSaved ? 'active-saved' : ''}`}
+                                type="button" 
+                                className={`instagram-action-btn ${hasSaved ? 'saved' : ''}`}
                                 onClick={() => saveFeedPost(post.id)}
+                                title="Save"
                               >
-                                <Clock size={14} />
-                                <span>{post.hasSaved ? 'Saved' : 'Save'}</span>
+                                <Bookmark size={20} fill={hasSaved ? "var(--accent-primary)" : "none"} color={hasSaved ? "var(--accent-primary)" : "currentColor"} />
                               </button>
                             </div>
 
-                            {/* Comments block */}
+                            {/* Likes count */}
+                            <div className="instagram-card-likes-count">
+                              <span>{post.likes} likes</span>
+                            </div>
+
+                            {/* Caption (Username + Content) - only for posts with images */}
+                            {post.image && (
+                              <div className="instagram-card-caption">
+                                <span className="instagram-caption-username">{post.userName}</span>
+                                <span className="instagram-caption-text">{post.content}</span>
+                              </div>
+                            )}
+
+                            {/* View Comments toggle */}
+                            <div className="instagram-card-comments-toggle" onClick={() => toggleCommentsSection(post.id)}>
+                              {post.commentsCount > 0 ? (
+                                <span>View all {post.commentsCount} comments</span>
+                              ) : (
+                                <span>No comments yet. Write one below</span>
+                              )}
+                            </div>
+
+                            {/* Nested Comments Drawer */}
                             {isExpanded && (
-                              <div className="post-comments-container">
-                                <div className="comments-list-stack">
-                                  {(post.comments || []).length === 0 ? (
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textAlign: 'center', padding: '0.5rem 0' }}>
-                                      No comments yet.
-                                    </div>
-                                  ) : (
-                                    (post.comments || []).map(comment => (
-                                      <div key={comment.id} className="comment-row-item">
-                                        <img src={comment.userAvatar} alt={comment.userName} className="comment-user-avatar" />
-                                        <div className="comment-bubble-box">
-                                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-primary)' }}>{comment.userName}</span>
-                                            <span style={{ fontSize: '0.68rem', color: 'var(--text-tertiary)' }}>{comment.time}</span>
-                                          </div>
-                                          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.15rem 0 0 0', lineHeight: 1.4 }}>{comment.text}</p>
-                                        </div>
+                              <div className="instagram-card-comments-section">
+                                <div className="instagram-comments-list">
+                                  {(post.comments || []).map(comment => (
+                                    <div key={comment.id} className="instagram-comment-item">
+                                      <img src={comment.userAvatar} alt={comment.userName} className="instagram-comment-avatar" />
+                                      <div className="instagram-comment-text-block">
+                                        <p className="instagram-comment-text-row">
+                                          <span className="instagram-comment-username">{comment.userName}</span>
+                                          <span className="instagram-comment-text">{comment.text}</span>
+                                        </p>
+                                        <span className="instagram-comment-time">{comment.time}</span>
                                       </div>
-                                    ))
-                                  )}
+                                    </div>
+                                  ))}
                                 </div>
-                                <form onSubmit={(e) => handleCommentSubmit(e, post.id)} className="comment-composer-form">
+                                <form onSubmit={(e) => handleCommentSubmit(e, post.id)} className="instagram-comment-composer">
                                   <input 
                                     type="text" 
-                                    placeholder="Write a comment..." 
+                                    placeholder="Add a comment..." 
                                     value={commentText} 
                                     onChange={(e) => setCommentInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
-                                    className="comment-composer-input"
+                                    className="instagram-comment-input"
                                     required
                                   />
-                                  <button type="submit" className="comment-submit-btn">
-                                    Reply
+                                  <button type="submit" className="instagram-comment-submit-btn">
+                                    Post
                                   </button>
                                 </form>
                               </div>
@@ -1401,85 +1332,131 @@ const MainAppLayout = () => {
 
                 </div>
               )}
-
-              {/* TAB: STUDENT PROFILE PORTFOLIO */}
-              {activeSocialTab === 'profile' && (
-                <div className="student-profile-tab-view" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              {/* TAB: NOTIFICATIONS */}
+              {activeSocialTab === 'notifications' && (
+                <div className="instagram-notifications-tab-view" style={{ maxWidth: '600px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--text-primary)' }}>Notifications</h3>
                   
-                  {/* Bio Card */}
-                  <div className="profile-bio-card">
-                    <div style={{ position: 'relative', display: 'flex' }}>
-                      <img src={currentUser?.avatar} alt={currentUser?.name} style={{ width: '72px', height: '72px', borderRadius: '50%', border: '3px solid var(--accent-primary)' }} />
-                      <span style={{ position: 'absolute', bottom: '2px', right: '2px', width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#22c55e', border: '2.5px solid var(--bg-surface-elevated)' }}></span>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{currentUser?.name}</h2>
-                        <span className="academic-badge-chip orange" style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px' }}>🔑 Club President</span>
+                  <div className="instagram-notifications-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem', borderRadius: '12px', border: '1px solid var(--border-subtle)', backgroundColor: 'var(--bg-surface-elevated)', overflow: 'hidden' }}>
+                    {notifications.length === 0 ? (
+                      <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                        No new notifications.
                       </div>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginTop: '0.15rem' }}>{currentUser?.branch || 'Computer Science'} • CSE Batch '26</span>
-                      <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: '0.65rem 0 0 0', lineHeight: 1.45 }}>
-                        Competitive coder, drone builder, and tea lover. Building the future of campus tech on UniSphere! 🚀
-                      </p>
-                      
-                      <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.85rem' }} className="profile-stats-row">
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}><strong style={{ color: 'var(--text-primary)' }}>412</strong> Followers</span>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}><strong style={{ color: 'var(--text-primary)' }}>195</strong> Following</span>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}><strong style={{ color: 'var(--text-primary)' }}>{feedPosts.filter(p => p.userId === currentUser?.id || p.userName === currentUser?.name).length}</strong> Social Posts</span>
-                      </div>
-                    </div>
+                    ) : (
+                      notifications.map(notif => (
+                        <div key={notif.id} className="instagram-notification-item" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.85rem 1rem', borderBottom: '1px solid var(--border-subtle)', transition: 'background-color 0.15s ease', cursor: notif.postId ? 'pointer' : 'default' }} onClick={() => {
+                          if (notif.postId) {
+                            setActiveSocialTab('feed');
+                            setFeedFilter(notif.postId);
+                          }
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
+                            <img src={notif.userAvatar} alt={notif.userName} style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
+                            <div style={{ fontSize: '0.82rem', color: 'var(--text-primary)', lineHeight: 1.4 }}>
+                              <strong style={{ fontWeight: 700, marginRight: '0.25rem' }}>{notif.userName}</strong>
+                              <span style={{ color: 'var(--text-secondary)' }}>{notif.detail}</span>
+                              <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginLeft: '0.5rem', whiteSpace: 'nowrap' }}>{notif.time}</span>
+                            </div>
+                          </div>
+                          {notif.postId && (
+                            <div style={{ width: '32px', height: '32px', borderRadius: '4px', background: 'var(--bg-deep)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', border: '1px solid var(--border-subtle)', flexShrink: 0, overflow: 'hidden' }}>
+                              {feedPosts.find(p => p.id === notif.postId)?.image ? (
+                                <img src={feedPosts.find(p => p.id === notif.postId).image} alt="thumb" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              ) : (
+                                <span>💬</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
                   </div>
+                </div>
+              )}
 
-                  {/* Achievements and Projects Cabinet Grid */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }} className="profile-cabinet-grid">
-                    
-                    {/* Achievements Cabinet */}
-                    <div style={{ padding: '1rem', border: '1px solid var(--border-subtle)', borderRadius: '12px', backgroundColor: 'var(--bg-surface-elevated)' }}>
-                      <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.4rem', marginBottom: '0.75rem' }}>🏆 Achievements Cabinet</h4>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {[
-                          { title: "ICPC Regional Finalist 2026", desc: "Newton School of Technology Rank #7 team lead" },
-                          { title: "Makerspace Drone Telemetry Pilot", desc: "Calibrated UAV drone evader collision avoidance algorithms" },
-                          { title: "CP Hub President badge key", desc: "Leading 195+ programmers on algorithmic seminars" }
-                        ].map(ach => (
-                          <div key={ach.title} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', padding: '0.25rem 0' }}>
-                            <span style={{ fontSize: '1rem', flexShrink: 0 }}>🏆</span>
-                            <div>
-                              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)' }}>{ach.title}</div>
-                              <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>{ach.desc}</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+              {activeSocialTab === 'profile' && (
+                <div className="student-profile-tab-view" style={{ maxWidth: '750px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  
+                  {/* Instagram-style Profile Header */}
+                  <div className="instagram-profile-header" style={{ display: 'flex', gap: '2.5rem', padding: '1.5rem 2rem', borderBottom: '1px solid var(--border-subtle)', alignItems: 'center' }}>
+                    <div style={{ position: 'relative' }}>
+                      <img src={viewUser?.avatar} alt={viewUser?.name} style={{ width: '96px', height: '96px', borderRadius: '50%', border: '3px solid var(--accent-primary)', padding: '2px', background: 'var(--bg-card)' }} />
+                      <span style={{ position: 'absolute', bottom: '4px', right: '4px', width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#22c55e', border: '2.5px solid var(--bg-surface-elevated)' }}></span>
                     </div>
-
-                    {/* Projects Showcase */}
-                    <div style={{ padding: '1rem', border: '1px solid var(--border-subtle)', borderRadius: '12px', backgroundColor: 'var(--bg-surface-elevated)' }}>
-                      <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.4rem', marginBottom: '0.75rem' }}>💻 Projects Showcase</h4>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {[
-                          { title: "Smart Hydroponics IoT watering sensor", github: "github.com/rahul/smart-hydroponics" },
-                          { title: "UAV Autonomous evasion node telemetry", github: "github.com/rahul/uav-evasion-node" }
-                        ].map(proj => (
-                          <div key={proj.title} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.35rem 0' }}>
-                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                              <span style={{ fontSize: '1rem' }}>⚙️</span>
-                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)' }}>{proj.title}</span>
-                            </div>
-                            <span style={{ fontSize: '0.65rem', color: 'var(--accent-primary)', background: 'var(--accent-subtle)', padding: '0.15rem 0.45rem', borderRadius: '4px', cursor: 'pointer' }}>GitHub 🔗</span>
-                          </div>
-                        ))}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{viewUser?.name}</h2>
+                        {viewUser?.id === 'user_rahul' && <span className="academic-badge-chip orange" style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>Club President</span>}
+                        {viewUser?.id === 'user_aarav' && <span className="academic-badge-chip emerald" style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>🔬 TA</span>}
+                        {viewUser?.id === 'user_priya' && <span className="academic-badge-chip blue" style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>🌟 Spotlight</span>}
                       </div>
-                    </div>
+                      
+                      <div style={{ display: 'flex', gap: '2rem' }} className="profile-stats-row">
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}><strong style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{getProfileStats(viewUser).followers}</strong> followers</span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}><strong style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{getProfileStats(viewUser).following}</strong> following</span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}><strong style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{feedPosts.filter(p => p.userId === viewUser?.id || p.userName === viewUser?.name).length}</strong> posts</span>
+                      </div>
 
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                        <span style={{ fontWeight: 600, color: 'var(--text-primary)', display: 'block' }}>{viewUser?.branch || 'Computer Science & Engineering'} • Batch {viewUser?.id === 'user_rahul' || viewUser?.name?.includes('Rahul') ? "'26" : "'27"}</span>
+                        <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-secondary)' }}>
+                          {viewUser?.id === 'user_rahul' ? "Competitive coder, drone builder, and tea lover. Building the future of campus tech on UniSphere." :
+                           viewUser?.id === 'user_aarav' ? "Hardware fabrication arrays, IoT sensory nodes, and makerspace drone flight mechanics." :
+                           viewUser?.id === 'user_priya' ? "Google AI Residency Fellow. Love to talk about neural architecture design, data models, and research papers." :
+                           "NST student | Connecting and learning | Creative explorer."}
+                        </p>
+                      </div>
+
+                      {viewUser?.id !== currentUser?.id && (
+                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                          <button
+                            type="button"
+                            onClick={() => toggleFollowUser(viewUser.id)}
+                            style={{
+                              padding: '0.4rem 1.2rem',
+                              borderRadius: '6px',
+                              border: 'none',
+                              background: followingIds.includes(viewUser.id) ? 'var(--bg-deep)' : 'var(--accent-primary)',
+                              color: followingIds.includes(viewUser.id) ? 'var(--text-secondary)' : '#FFFFFF',
+                              fontSize: '0.8rem',
+                              fontWeight: 600,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {followingIds.includes(viewUser.id) ? 'Following' : 'Follow'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedSocialPeerId(viewUser.id);
+                              setActiveSocialTab('messages');
+                            }}
+                            style={{
+                              padding: '0.4rem 1.2rem',
+                              borderRadius: '6px',
+                              border: '1px solid var(--border-subtle)',
+                              background: 'transparent',
+                              color: 'var(--text-primary)',
+                              fontSize: '0.8rem',
+                              fontWeight: 600,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Message
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Visual Post Portfolio Grid */}
-                  <div style={{ padding: '1rem', border: '1px solid var(--border-subtle)', borderRadius: '12px', backgroundColor: 'var(--bg-surface-elevated)' }}>
-                    <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.4rem', marginBottom: '0.75rem' }}>📱 My Visual Posts Grid</h4>
+                  <div style={{ padding: '0.5rem 0' }}>
+                    <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span>Posts</span>
+                    </h4>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }} className="profile-portfolio-grid">
                       {feedPosts
-                        .filter(post => post.userId === currentUser?.id || post.userName === currentUser?.name)
+                        .filter(post => post.userId === viewUser?.id || post.userName === viewUser?.name)
                         .map(post => {
                           const isImage = !!post.image;
                           return (
@@ -1496,16 +1473,15 @@ const MainAppLayout = () => {
                                 borderRadius: '8px',
                                 overflow: 'hidden',
                                 cursor: 'pointer',
-                                background: isImage ? `url(${post.image}) center/cover no-repeat` : (post.bannerColor || 'linear-gradient(135deg, #1e3a8a, #0f172a)'),
+                                background: isImage ? `url(${post.image}) center/cover no-repeat` : 'var(--bg-deep)',
                                 border: '1px solid var(--border-subtle)'
                               }}
                               className="portfolio-item-tile"
                               title={post.content}
                             >
                               {!isImage && (
-                                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0.5rem', textAlign: 'center', color: '#FFFFFF' }}>
-                                  <span style={{ fontSize: '1.2rem', marginBottom: '0.25rem' }}>{post.bannerEmoji || '🏆'}</span>
-                                  <span style={{ fontSize: '0.65rem', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>{post.bannerTitle}</span>
+                                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.75rem', textAlign: 'center', backgroundColor: 'var(--bg-deep)', color: 'var(--text-primary)' }}>
+                                  <span style={{ fontSize: '0.72rem', fontWeight: 600, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{post.content}</span>
                                 </div>
                               )}
                               
@@ -2750,82 +2726,123 @@ const MainAppLayout = () => {
       <div className="right-quick-glance-panel">
         
         {appMode === 'social' ? (
-          <div className="discovery-panel-container">
-            {/* Online Friends List */}
-            <div className="discovery-section-card">
-              <div className="discovery-card-header">
-                <Smile size={14} className="discovery-card-icon" />
-                <span style={{ fontSize: '0.78rem' }}>Online Peers</span>
+          <div className="discovery-panel-container instagram-right-sidebar">
+            {/* Suggested Students */}
+            <div className="instagram-sidebar-section">
+              <div className="instagram-section-header">
+                <span>Suggested Students</span>
+                <button type="button" className="see-all-btn" onClick={() => setActiveSocialTab('explore')}>See All</button>
               </div>
-              <div className="online-friends-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', padding: '0.25rem 0' }}>
+              <div className="instagram-suggestions-list">
                 {[
-                  { id: "user_aarav", name: "Aarav Mehta", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav", status: "Testing UAV flight code", branch: "CSE '27" },
-                  { id: "user_priya", name: "Priya Patel", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Priya", status: "Reviewing resume edits", branch: "CSE '27" },
-                  { id: "user_kabir", name: "Kabir Sen", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Kabir", status: "Practicing bass for fest", branch: "ECE '26" },
-                  { id: "user_ria", name: "Ria Sharma", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Ria", status: "Designing club posters", branch: "Design '28" }
+                  { id: "user_aarav", name: "Aarav Mehta", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav", dept: "CSE '26" },
+                  { id: "user_priya", name: "Priya Patel", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Priya", dept: "CSE '27" },
+                  { id: "user_kabir", name: "Kabir Sen", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Kabir", dept: "ECE '26" }
+                ].map(peer => {
+                  const isFollowing = followingIds.includes(peer.id);
+                  return (
+                    <div key={peer.id} className="instagram-suggestion-row">
+                      <div className="suggestion-user-info" onClick={() => {
+                        const peerUser = users.find(u => u.id === peer.id) || { id: peer.id, name: peer.name, avatar: peer.avatar, role: 'student', branch: peer.dept };
+                        setProfileViewUser(peerUser);
+                        setActiveSocialTab('profile');
+                      }} style={{ cursor: 'pointer' }}>
+                        <img src={peer.avatar} alt={peer.name} className="suggestion-avatar" />
+                        <div className="suggestion-text">
+                          <span className="suggestion-username">{peer.name}</span>
+                          <span className="suggestion-subtext">{peer.dept}</span>
+                        </div>
+                      </div>
+                      <button 
+                        type="button" 
+                        className={`suggestion-action-btn ${isFollowing ? 'following' : ''}`}
+                        onClick={() => toggleFollowUser(peer.id)}
+                      >
+                        {isFollowing ? 'Following' : 'Follow'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Suggested Clubs */}
+            <div className="instagram-sidebar-section">
+              <div className="instagram-section-header">
+                <span>Suggested Clubs</span>
+                <button type="button" className="see-all-btn" onClick={() => setActiveSocialTab('explore')}>See All</button>
+              </div>
+              <div className="instagram-suggestions-list">
+                {recommendedClubs.slice(0, 2).map(club => (
+                  <div key={club.id} className="instagram-suggestion-row">
+                    <div className="suggestion-user-info">
+                      <div className="suggestion-club-logo">{club.logo}</div>
+                      <div className="suggestion-text">
+                        <span className="suggestion-username">{club.name}</span>
+                        <span className="suggestion-subtext">{club.members} members</span>
+                      </div>
+                    </div>
+                    <button 
+                      type="button" 
+                      className={`suggestion-action-btn ${club.joined ? 'joined' : ''}`}
+                      onClick={() => toggleJoinClub(club.id)}
+                    >
+                      {club.joined ? 'Joined' : 'Join'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Suggested Communities */}
+            <div className="instagram-sidebar-section">
+              <div className="instagram-section-header">
+                <span>Suggested Communities</span>
+              </div>
+              <div className="instagram-suggestions-list">
+                {[
+                  { id: "comm_ai", name: "AI-ML Circle", members: "184 members", icon: "🧠" },
+                  { id: "comm_music", name: "Music Cell", members: "125 members", icon: "🎸" }
+                ].map(comm => (
+                  <div key={comm.id} className="instagram-suggestion-row">
+                    <div className="suggestion-user-info">
+                      <div className="suggestion-club-logo" style={{ background: 'var(--bg-deep)' }}>{comm.icon}</div>
+                      <div className="suggestion-text">
+                        <span className="suggestion-username">{comm.name}</span>
+                        <span className="suggestion-subtext">{comm.members}</span>
+                      </div>
+                    </div>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', paddingRight: '0.5rem' }}>Active</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recent DMs */}
+            <div className="instagram-sidebar-section">
+              <div className="instagram-section-header">
+                <span>Recent DMs</span>
+                <button type="button" className="see-all-btn" onClick={() => setActiveSocialTab('messages')}>All Messages</button>
+              </div>
+              <div className="instagram-suggestions-list">
+                {[
+                  { id: "user_aarav", name: "Aarav Mehta", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav", lastMsg: "Yeah, the evasion sensor index..." },
+                  { id: "user_priya", name: "Priya Patel", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Priya", lastMsg: "Congrats on ICPC regionals, Rahul!" }
                 ].map(peer => (
-                  <div key={peer.id} className="online-peer-row" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                    <div style={{ position: 'relative', display: 'flex' }}>
-                      <img 
-                        src={peer.avatar} 
-                        alt={peer.name} 
-                        style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #22c55e', padding: '1px', background: 'var(--bg-card)' }}
-                      />
-                      <span className="online-status-dot" style={{ position: 'absolute', bottom: 0, right: 0, width: '8px', height: '8px', backgroundColor: '#22c55e', border: '1.5px solid var(--bg-card)', borderRadius: '50%' }}></span>
+                  <div key={peer.id} className="instagram-suggestion-row" style={{ cursor: 'pointer' }} onClick={() => {
+                    setSelectedSocialPeerId(peer.id);
+                    setActiveSocialTab('messages');
+                  }}>
+                    <div className="suggestion-user-info">
+                      <img src={peer.avatar} alt={peer.name} className="suggestion-avatar" />
+                      <div className="suggestion-text">
+                        <span className="suggestion-username">{peer.name}</span>
+                        <span className="suggestion-subtext" style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '140px' }}>{peer.lastMsg}</span>
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>{peer.name}</span>
-                      <span style={{ fontSize: '0.68rem', color: 'var(--accent-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{peer.status}</span>
-                    </div>
+                    <span style={{ fontSize: '0.62rem', color: 'var(--text-tertiary)' }}>●</span>
                   </div>
                 ))}
-              </div>
-            </div>
-
-            {/* Social Buzz Live Stream */}
-            <div className="discovery-section-card">
-              <div className="discovery-card-header">
-                <TrendingUp size={14} className="discovery-card-icon" />
-                <span style={{ fontSize: '0.78rem' }}>Live Campus Buzz</span>
-              </div>
-              <div className="buzz-stream" style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                {[
-                  { text: "Makerspace drone flight calibration check in the central courtyard! 🛸", time: "2m ago" },
-                  { text: "NST Summer Fest ticket bookings are now open! 🔥 Get yours at the Hub.", time: "15m ago" },
-                  { text: "Placement cell uploaded the Google AI residency guidelines sheet.", time: "45m ago" },
-                  { text: "Robotics recruitment coding challenge link is live now.", time: "1h ago" }
-                ].map((buzz, bIdx) => (
-                  <div key={bIdx} className="buzz-item" style={{ fontSize: '0.75rem', padding: '0.5rem', borderRadius: '6px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-                    <p style={{ margin: 0, color: 'var(--text-primary)', lineHeight: 1.3 }}>{buzz.text}</p>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', display: 'block', marginTop: '0.25rem', textAlign: 'right' }}>{buzz.time}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Campus Statistics (Pulse) */}
-            <div className="discovery-section-card">
-              <div className="discovery-card-header">
-                <Clock size={14} className="discovery-card-icon" />
-                <span style={{ fontSize: '0.78rem' }}>Social Pulse</span>
-              </div>
-              <div className="campus-stats-grid">
-                <div className="campus-stat-tile">
-                  <span className="campus-stat-value">● {campusStats.onlineCount}</span>
-                  <span className="campus-stat-label">Online Now</span>
-                </div>
-                <div className="campus-stat-tile">
-                  <span className="campus-stat-value">{campusStats.activeClubs}</span>
-                  <span className="campus-stat-label">Active Clubs</span>
-                </div>
-                <div className="campus-stat-tile">
-                  <span className="campus-stat-value">{campusStats.placementsSuccess}%</span>
-                  <span className="campus-stat-label">Placements</span>
-                </div>
-                <div className="campus-stat-tile">
-                  <span className="campus-stat-value">{campusStats.upcomingEvents}</span>
-                  <span className="campus-stat-label">New Events</span>
-                </div>
               </div>
             </div>
           </div>
