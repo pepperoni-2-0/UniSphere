@@ -17,7 +17,8 @@ import {
   initialMoments,
   initialFeedPosts,
   initialRecommendedClubs,
-  initialCampusStats
+  initialCampusStats,
+  initialNotifications
 } from "../data/mockData";
 
 const AppContext = createContext();
@@ -46,6 +47,7 @@ export function AppProvider({ children }) {
   const [moments, setMoments] = useState(() => getStored("moments", initialMoments));
   const [recommendedClubs, setRecommendedClubs] = useState(() => getStored("recommendedClubs", initialRecommendedClubs));
   const [campusStats, setCampusStats] = useState(() => getStored("campusStats", initialCampusStats));
+  const [notifications, setNotifications] = useState(() => getStored("notifications", initialNotifications));
   
   const [currentUser, setCurrentUser] = useState(() => getStored("currentUser", null));
   const [currentWorkspaceId, setCurrentWorkspaceId] = useState(() => getStored("currentWorkspaceId", "nst"));
@@ -66,6 +68,10 @@ export function AppProvider({ children }) {
   useEffect(() => {
     localStorage.setItem("unisphere_recommendedClubs", JSON.stringify(recommendedClubs));
   }, [recommendedClubs]);
+
+  useEffect(() => {
+    localStorage.setItem("unisphere_notifications", JSON.stringify(notifications));
+  }, [notifications]);
 
   // Dark/Light Theme State
   const [theme, setTheme] = useState(() => {
@@ -749,7 +755,9 @@ export function AppProvider({ children }) {
         saveFeedPost,
         addCommentToPost,
         createFeedPost,
-        toggleJoinClub
+        toggleJoinClub,
+        notifications,
+        setNotifications
       }}
     >
       {children}
