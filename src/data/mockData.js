@@ -24,19 +24,159 @@ export const initialWorkspaces = [
   }
 ];
 
+export const ROLE_REGISTRY = {
+  platform_admin: {
+    id: "platform_admin",
+    name: "UniSphere Administrator",
+    level: 110,
+    colorClass: "role-platform-admin",
+    badgeLabel: "Platform Admin",
+    description: "Global platform operator with root access.",
+    permissions: ["post_announcements", "manage_discussions", "pin_messages", "manage_channels", "manage_roles"]
+  },
+  platform_support: {
+    id: "platform_support",
+    name: "Platform Support",
+    level: 105,
+    colorClass: "role-platform-support",
+    badgeLabel: "Support",
+    description: "Global helpdesk support staff.",
+    permissions: ["manage_discussions"]
+  },
+  inst_admin: {
+    id: "inst_admin",
+    name: "Institution Administrator",
+    level: 100,
+    colorClass: "role-inst-admin",
+    badgeLabel: "Inst Admin",
+    description: "Full administrative access to all campus resources, roles, and settings.",
+    permissions: ["post_announcements", "manage_discussions", "pin_messages", "manage_channels", "manage_roles"]
+  },
+  campus_director: {
+    id: "campus_director",
+    name: "Campus Director",
+    level: 95,
+    colorClass: "role-campus-director",
+    badgeLabel: "Director",
+    description: "Senior campus leadership. Oversees institutional operations.",
+    permissions: ["post_announcements", "manage_discussions", "pin_messages", "manage_channels"]
+  },
+  academic_coordinator: {
+    id: "academic_coordinator",
+    name: "Academic Coordinator",
+    level: 90,
+    colorClass: "role-academic-coord",
+    badgeLabel: "Coordinator",
+    description: "Curriculum oversight and department coordination.",
+    permissions: ["post_announcements", "manage_discussions", "pin_messages", "manage_channels"]
+  },
+  professor: {
+    id: "professor",
+    name: "Professor",
+    level: 85,
+    colorClass: "role-professor",
+    badgeLabel: "Professor",
+    description: "Tenured or adjunct teaching staff leading courses.",
+    permissions: ["post_announcements", "manage_discussions", "pin_messages"]
+  },
+  faculty: {
+    id: "faculty",
+    name: "Faculty Member",
+    level: 80,
+    colorClass: "role-faculty",
+    badgeLabel: "Faculty",
+    description: "Academic faculty, teachers, and lecturers.",
+    permissions: ["post_announcements", "manage_discussions", "pin_messages"]
+  },
+  ta: {
+    id: "ta",
+    name: "Teaching Assistant",
+    level: 50,
+    colorClass: "role-ta",
+    badgeLabel: "TA",
+    description: "Graduate or upperclassman assistant supporting discussions and grading.",
+    permissions: ["manage_discussions", "pin_messages"]
+  },
+  club_president: {
+    id: "club_president",
+    name: "Club President",
+    level: 45,
+    colorClass: "role-club-lead",
+    badgeLabel: "Club Lead",
+    description: "Elected student lead for campus clubs and organisations.",
+    permissions: ["manage_channels"]
+  },
+  club_core: {
+    id: "club_core",
+    name: "Club Core Team",
+    level: 40,
+    colorClass: "role-club-lead",
+    badgeLabel: "Club Core",
+    description: "Executive committee members of student clubs.",
+    permissions: []
+  },
+  placement_coordinator: {
+    id: "placement_coordinator",
+    name: "Placement Coordinator",
+    level: 42,
+    colorClass: "role-placement-coord",
+    badgeLabel: "Placement Coord",
+    description: "Student representative coordinating corporate recruitment.",
+    permissions: ["post_announcements"]
+  },
+  event_coordinator: {
+    id: "event_coordinator",
+    name: "Event Coordinator",
+    level: 35,
+    colorClass: "role-club-lead",
+    badgeLabel: "Events Coord",
+    description: "Organises student events, hackathons, and guest lectures.",
+    permissions: []
+  },
+  student: {
+    id: "student",
+    name: "Student",
+    level: 10,
+    colorClass: "role-student",
+    badgeLabel: "Student",
+    description: "Enrolled university student.",
+    permissions: []
+  },
+  alumni: {
+    id: "alumni",
+    name: "Alumni",
+    level: 12,
+    colorClass: "role-alumni",
+    badgeLabel: "Alumni",
+    description: "Graduated alumni supporting networking and recruitment.",
+    permissions: []
+  },
+  prospective: {
+    id: "prospective",
+    name: "Prospective Student",
+    level: 5,
+    colorClass: "role-student",
+    badgeLabel: "Prospective",
+    description: "Visiting student inquiring about programs and admissions.",
+    permissions: []
+  }
+};
+
 export const initialUsers = [
   {
     id: "user_rahul",
     email: "rahul@nst.edu",
     name: "Rahul Sharma",
     avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Rahul",
-    role: "student", // student, faculty, admin
+    role: "student",
+    roleIds: ["student", "club_president"],
     branch: "Computer Science & Engineering",
     batch: "2026",
     interests: ["Coding", "Robotics", "Web3", "Hackathons"],
-    status: "online", // online, away, dnd, offline
+    status: "online",
     customStatusText: "Coding in progress...",
-    workspaces: ["nst", "bits"]
+    workspaces: ["nst", "bits"],
+    club: "Developers Club"
   },
   {
     id: "user_priya",
@@ -44,12 +184,14 @@ export const initialUsers = [
     name: "Priya Patel",
     avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Priya",
     role: "student",
+    roleIds: ["student", "placement_coordinator"],
     branch: "Artificial Intelligence & Machine Learning",
     batch: "2027",
     interests: ["AI/ML", "Design", "Music", "Reading"],
     status: "online",
     customStatusText: "Analyzing datasets",
-    workspaces: ["nst"]
+    workspaces: ["nst"],
+    club: "Competitive Programming Hub"
   },
   {
     id: "user_prasad",
@@ -57,6 +199,7 @@ export const initialUsers = [
     name: "Dr. A. K. Prasad",
     avatar: "https://api.dicebear.com/7.x/initials/svg?seed=Dr+Prasad",
     role: "faculty",
+    roleIds: ["professor", "faculty", "academic_coordinator"],
     branch: "Computer Science",
     batch: "Faculty Core",
     interests: ["Algorithms", "Machine Learning", "Research"],
@@ -70,12 +213,56 @@ export const initialUsers = [
     name: "NST Admin Portal",
     avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=NSTAdmin",
     role: "admin",
+    roleIds: ["inst_admin"],
     branch: "Administration",
     batch: "Staff",
     interests: ["Operations", "Events", "Moderation"],
     status: "online",
-    customStatusText: "UniSphere Moderator",
+    customStatusText: "UniSphere Coordinator",
     workspaces: ["nst", "iitd", "bits"]
+  },
+  {
+    id: "user_aarav",
+    email: "aarav@nst.edu",
+    name: "Aarav Mehta",
+    avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav",
+    role: "student",
+    roleIds: ["student", "ta"],
+    branch: "Computer Science & Engineering",
+    batch: "2026",
+    interests: ["Data Structures", "Open Source", "Teaching"],
+    status: "online",
+    customStatusText: "Grading lab assignments",
+    workspaces: ["nst"],
+    club: "Developers Club"
+  },
+  {
+    id: "user_vikram",
+    email: "vikram@alumni.edu",
+    name: "Vikram Malhotra",
+    avatar: "https://api.dicebear.com/7.x/initials/svg?seed=Vikram",
+    role: "student",
+    roleIds: ["alumni"],
+    branch: "Computer Science & Engineering",
+    batch: "2024",
+    interests: ["Software Engineering", "Mentorship", "Startups"],
+    status: "offline",
+    customStatusText: "SDE at Microsoft",
+    workspaces: ["nst"]
+  },
+  {
+    id: "user_director",
+    email: "director@nst.edu",
+    name: "Dr. Sandeep Verma",
+    avatar: "https://api.dicebear.com/7.x/initials/svg?seed=Sandeep+Verma",
+    role: "faculty",
+    roleIds: ["campus_director", "faculty"],
+    branch: "Executive Office",
+    batch: "Staff",
+    interests: ["Policy", "Funding", "Education Innovation"],
+    status: "away",
+    customStatusText: "Meeting with board",
+    workspaces: ["nst"]
   }
 ];
 
@@ -471,4 +658,286 @@ export const initialTrending = [
   { id: "tr_3", name: "placement-cell", count: 49 },
   { id: "tr_4", name: "memes", count: 32 }
 ];
+
+export const initialMoments = [
+  {
+    id: "moment_robotics",
+    title: "Robotics Club",
+    club: "Robotics Club",
+    avatar: "🤖",
+    coverBg: "linear-gradient(135deg, #1e293b, #0f172a)",
+    description: "Sneak peek into our new autonomous UAV drone test flights! Team calibrating LIDAR sensors in the courtyard. Recruitment interviews start Monday at 4 PM in Makerspace.",
+    views: 124
+  },
+  {
+    id: "moment_gdsc",
+    title: "GDSC Chapter",
+    club: "GDSC Chapter",
+    avatar: "⚡",
+    coverBg: "linear-gradient(135deg, #0284c7, #075985)",
+    description: "Reliving highlights from yesterday's Android Compose workshop. Over 120+ attendees built their first reactive UI. Resource slide deck uploaded in #web-development channel!",
+    views: 245
+  },
+  {
+    id: "moment_career",
+    title: "Placement Cell",
+    club: "Placement Desk",
+    avatar: "💼",
+    coverBg: "linear-gradient(135deg, #581c87, #3b0764)",
+    description: "Official statistics snapshot for the 2026 graduating batch! BITS, NST, and IIT Delhi workspaces are reporting a combined 88% placement achievement with 14 active corporate drives this week.",
+    views: 412
+  },
+  {
+    id: "moment_fest",
+    title: "NST Fest 2026",
+    club: "Cultural Cell",
+    avatar: "🎉",
+    coverBg: "linear-gradient(135deg, #b45309, #78350f)",
+    description: "NST Summer Fest teaser is officially out! 3 days of hackathons, music concerts, and tech debates. Guest speaker registrations opening on the portal tonight.",
+    views: 386
+  },
+  {
+    id: "moment_spotlight",
+    title: "Student Spotlight",
+    club: "Student Council",
+    avatar: "🌟",
+    coverBg: "linear-gradient(135deg, #065f46, #022c22)",
+    description: "Student Spotlight of the week: Priya Patel! Securing an AI Research fellowship at Google Labs. Read her interview on resume building and GitHub portfolio review on the Placement Cell tab.",
+    views: 198
+  }
+];
+
+export const initialFeedPosts = [
+  {
+    id: "feed_post_1",
+    userId: "user_rahul",
+    userName: "Rahul Sharma",
+    userAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Rahul",
+    userRoleIds: ["student", "club_president"],
+    department: "Computer Science & Engineering",
+    time: "2 hours ago",
+    content: "Thrilled to share that our team has officially qualified for the ICPC Regionals 2026! We ranked 7th overall in the preliminary coding rounds. Immense gratitude to Dr. Prasad for guiding us on tree-partitioning algorithms, and to my teammates Aarav and Priya for debugging under absolute pressure. Code repository and solutions draft uploaded to the CP Hub files desk. Let's do this! 🚀 #ICPCRegionals #CompetitiveProgramming",
+    type: "achievement",
+    bannerColor: "linear-gradient(135deg, #1e3a8a, #0f172a)",
+    bannerEmoji: "🏆",
+    bannerTitle: "ICPC Regionals 2026",
+    bannerSubtitle: "Newton School of Technology - Rank #7 Qualified",
+    image: null,
+    likes: 42,
+    commentsCount: 3,
+    shares: 12,
+    hasLiked: false,
+    hasSaved: false,
+    comments: [
+      {
+        id: "c_1",
+        userName: "Dr. A. K. Prasad",
+        userAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=Dr+Prasad",
+        text: "Exceptional work, Rahul! Your tree-decomposition optimization saved crucial milliseconds. Keep this focus for the regionals.",
+        time: "1 hour ago"
+      },
+      {
+        id: "c_2",
+        userName: "Aarav Mehta",
+        userAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav",
+        text: "Dijkstra optimization under pressure! Proud of our team. Let's practice bipartite matching next.",
+        time: "45 mins ago"
+      }
+    ]
+  },
+  {
+    id: "feed_post_2",
+    userId: "user_admin",
+    userName: "Google Developer Student Clubs",
+    userAvatar: "https://api.dicebear.com/7.x/identicon/svg?seed=NSTAdmin",
+    userRoleIds: ["inst_admin"],
+    department: "Campus Chapter",
+    time: "4 hours ago",
+    content: "📢 Registrations are now officially OPEN for HackSprint 2026! 📢\nThis is a 36-hour hackathon focused on solving local environment and campus productivity challenges. Open to BITS, IIT, and NST students. Join us to prototype, pitch, and win cash prizes of up to $2,500. Mentors from placement cells and Google engineering teams will be evaluating drafts. Apply in teams of 2-4 using the link below! #HackSprint2026 #Hackathon #Coding #Innovation",
+    type: "event",
+    bannerColor: "linear-gradient(135deg, #0284c7, #0f172a)",
+    bannerEmoji: "🚀",
+    bannerTitle: "HackSprint 2026 Registrations Open",
+    bannerSubtitle: "Date: June 15-17 | 36 Hours | Seminars & Mentors",
+    image: null,
+    likes: 78,
+    commentsCount: 2,
+    shares: 24,
+    hasLiked: true,
+    hasSaved: false,
+    comments: [
+      {
+        id: "c_3",
+        userName: "Priya Patel",
+        userAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Priya",
+        text: "Teaming up with Rahul for campus navigation booking app. Excited!",
+        time: "3 hours ago"
+      }
+    ]
+  },
+  {
+    id: "feed_post_3",
+    userId: "user_aarav",
+    userName: "Aarav Mehta",
+    userAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav",
+    userRoleIds: ["student", "ta"],
+    department: "Computer Science & Engineering",
+    time: "6 hours ago",
+    content: "Recruitment drives for the Robotics & Hardware Club begin this Monday! We are looking for engineers, drone builders, and firmware enthusiasts who want to work on autonomous UAV collision evasion and IoT sensor arrays. Interviews will be hosted in Makerspace Hall A. Review mock interview guides in the #robotics-club channel files tab! 🤖 #RoboticsClubRecruitment #HardwareHacking #IoT",
+    type: "club",
+    bannerColor: "linear-gradient(135deg, #d97706, #1c1917)",
+    bannerEmoji: "🤖",
+    bannerTitle: "Robotics Club Recruitment",
+    bannerSubtitle: "Monday 4:00 PM | Makerspace Hall A | UAV Evasion Project",
+    image: "/assets/robotics_drone.png",
+    likes: 29,
+    commentsCount: 1,
+    shares: 4,
+    hasLiked: false,
+    hasSaved: false,
+    comments: [
+      {
+        id: "c_4",
+        userName: "Rahul Sharma",
+        userAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Rahul",
+        text: "High recommendation! The makerspace labs have incredible testing gear.",
+        time: "5 hours ago"
+      }
+    ]
+  },
+  {
+    id: "feed_post_4",
+    userId: "user_prasad",
+    userName: "Dr. A. K. Prasad",
+    userAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=Dr+Prasad",
+    userRoleIds: ["professor", "faculty", "academic_coordinator"],
+    department: "Computer Science",
+    time: "1 day ago",
+    content: "The final project guidelines for CSE-202 (Database Management Systems Lab) have been uploaded to the academic curriculum folders. All student groups must implement indexing optimization (B+ Trees or Hash Indexes) and submit schema diagrams. Make sure to commit tests on your GitHub repositories. Plagiarism check will be run on June 12. Reach out in my cabin hours for review.",
+    type: "faculty",
+    bannerColor: "linear-gradient(135deg, #059669, #022c22)",
+    bannerEmoji: "📝",
+    bannerTitle: "DBMS Project Guidelines Uploaded",
+    bannerSubtitle: "Due: June 12 | 25% Grade Weight | Plagiarism Checks",
+    image: null,
+    likes: 38,
+    commentsCount: 1,
+    shares: 2,
+    hasLiked: false,
+    hasSaved: false,
+    comments: [
+      {
+        id: "c_5",
+        userName: "Aarav Mehta",
+        userAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav",
+        text: "I will host a schema design workshop in lab room 402 this Friday to help with indexing guidelines.",
+        time: "20 hours ago"
+      }
+    ]
+  },
+  {
+    id: "feed_post_5",
+    userId: "user_priya",
+    userName: "Priya Patel",
+    userAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Priya",
+    userRoleIds: ["student", "placement_coordinator"],
+    department: "Placement Cell",
+    time: "1 day ago",
+    content: "💼 Career Placement Cell Alert: Google Software Engineering Summer Internship (Batch 2027) application links are now officially live on the student placement portal. Stipends are highly competitive. Check the eligibility lists (CSE, AIML, Data Science, CGPA > 8.0) and schedule resume reviews with senior placement coordinators. Prepare coding rounds using CP Hub mock links. #GoogleInternship #PlacementCell #CareerDrive",
+    type: "placement",
+    bannerColor: "linear-gradient(135deg, #7c3aed, #1e1b4b)",
+    bannerEmoji: "💼",
+    bannerTitle: "Google Summer Internships 2027",
+    bannerSubtitle: "Deadline: June 5, 2026 | CGPA > 8.0 | CSE, AIML, DS",
+    image: null,
+    likes: 84,
+    commentsCount: 0,
+    shares: 31,
+    hasLiked: false,
+    hasSaved: true,
+    comments: []
+  },
+  {
+    id: "feed_post_6",
+    userId: "user_cultural",
+    userName: "Cultural Club NST",
+    userAvatar: "https://api.dicebear.com/7.x/identicon/svg?seed=NSTCulture",
+    userRoleIds: ["student", "club_president"],
+    department: "Cultural Cell",
+    time: "1 hour ago",
+    content: "Stage is set, sound checks are complete! The NST Summer Fest 2026 kicks off tonight at 7:00 PM. Get ready for 3 days of hackathons, gaming arrays, live electronic concerts, and street food setups. Tag your group and see you at the campus main lawn! 🎸🔥 #NSTFest #CampusBeat #SummerMainStage #CampusLife",
+    type: "social",
+    image: "/assets/campus_festival.png",
+    likes: 152,
+    commentsCount: 0,
+    shares: 54,
+    hasLiked: false,
+    hasSaved: false,
+    comments: []
+  },
+  {
+    id: "feed_post_7",
+    userId: "user_memecell",
+    userName: "Dev Club Memes",
+    userAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=Meme",
+    userRoleIds: ["student"],
+    department: "Meme Cell",
+    time: "3 hours ago",
+    content: "Local IDE vs Production reality check. Tag that classmate whose code compiles perfectly in 1 millisecond on localhost, but explodes into flames in production! 💻🔥 #coder #production #bugs #localhost #codinghumor",
+    type: "meme",
+    image: "/assets/coder_meme.png",
+    likes: 245,
+    commentsCount: 2,
+    shares: 88,
+    hasLiked: false,
+    hasSaved: false,
+    comments: [
+      {
+        id: "c_6",
+        userName: "Aarav Mehta",
+        userAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav",
+        text: "Too close to home... deployment failed at stack trace line 193 💀",
+        time: "2 hours ago"
+      },
+      {
+        id: "c_7",
+        userName: "Rahul Sharma",
+        userAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Rahul",
+        text: "Classic git push to production on a Friday afternoon! 😂",
+        time: "1 hour ago"
+      }
+    ]
+  },
+  {
+    id: "feed_post_8",
+    userId: "user_aarav",
+    userName: "Aarav Mehta",
+    userAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav",
+    userRoleIds: ["student", "ta"],
+    department: "Computer Science & Engineering",
+    time: "5 hours ago",
+    content: "Showcasing our smart agriculture IoT watering array built in makerspace for the CSE-202 Database Systems project! We integrated sensor arrays with microcontrollers to adjust soil moisture dynamically. Wiring diagrams and index queries are pushed to our Github. Drop by makerspace lab room 405 to test it! 🌱🤖 #smartcampus #makerspace #arduino #iot #projectshowcase",
+    type: "social",
+    image: "/assets/project_showcase.png",
+    likes: 112,
+    commentsCount: 0,
+    shares: 19,
+    hasLiked: false,
+    hasSaved: false,
+    comments: []
+  }
+];
+
+export const initialRecommendedClubs = [
+  { id: "club_rec_1", name: "Google Developer Student Clubs", logo: "⚡", members: 318, joined: false },
+  { id: "club_rec_2", name: "Competitive Programming Hub", logo: "📈", members: 195, joined: true },
+  { id: "club_rec_3", name: "Robotics & Hardware Club", logo: "🤖", members: 142, joined: false }
+];
+
+export const initialCampusStats = {
+  onlineCount: 142,
+  activeClubs: 8,
+  placementsSuccess: 88,
+  upcomingEvents: 3
+};
 

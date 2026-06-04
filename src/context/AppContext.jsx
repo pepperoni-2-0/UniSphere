@@ -12,7 +12,12 @@ import {
   initialActivityFeed,
   initialSchedule,
   initialDeadlines,
-  initialTrending
+  initialTrending,
+  ROLE_REGISTRY,
+  initialMoments,
+  initialFeedPosts,
+  initialRecommendedClubs,
+  initialCampusStats
 } from "../data/mockData";
 
 const AppContext = createContext();
@@ -36,6 +41,11 @@ export function AppProvider({ children }) {
   const [messages, setMessages] = useState(() => getStored("messages", initialMessages));
   const [threadReplies, setThreadReplies] = useState(() => getStored("threadReplies", initialThreadReplies));
   const [directMessages, setDirectMessages] = useState(() => getStored("directMessages", initialDirectMessages));
+  const [roles, setRoles] = useState(() => getStored("roles", ROLE_REGISTRY));
+  const [feedPosts, setFeedPosts] = useState(() => getStored("feedPosts", initialFeedPosts));
+  const [moments, setMoments] = useState(() => getStored("moments", initialMoments));
+  const [recommendedClubs, setRecommendedClubs] = useState(() => getStored("recommendedClubs", initialRecommendedClubs));
+  const [campusStats, setCampusStats] = useState(() => getStored("campusStats", initialCampusStats));
   
   const [currentUser, setCurrentUser] = useState(() => getStored("currentUser", null));
   const [currentWorkspaceId, setCurrentWorkspaceId] = useState(() => getStored("currentWorkspaceId", "nst"));
@@ -44,6 +54,18 @@ export function AppProvider({ children }) {
   const [activeThreadParentId, setActiveThreadParentId] = useState(() => getStored("activeThreadParentId", null));
   const [searchQuery, setSearchQuery] = useState("");
   const [systemAccent, setSystemAccent] = useState(() => getStored("systemAccent", "emerald")); // emerald, teal, mint, steel
+
+  useEffect(() => {
+    localStorage.setItem("unisphere_roles", JSON.stringify(roles));
+  }, [roles]);
+
+  useEffect(() => {
+    localStorage.setItem("unisphere_feedPosts", JSON.stringify(feedPosts));
+  }, [feedPosts]);
+
+  useEffect(() => {
+    localStorage.setItem("unisphere_recommendedClubs", JSON.stringify(recommendedClubs));
+  }, [recommendedClubs]);
 
   // Dark/Light Theme State
   const [theme, setTheme] = useState(() => {
@@ -145,9 +167,14 @@ export function AppProvider({ children }) {
   const loginUser = (userId) => {
     const user = users.find((u) => u.id === userId);
     if (user) {
-      setCurrentUser(user);
+      // Migrate role to roleIds if needed
+      const updatedUser = { ...user };
+      if (!updatedUser.roleIds || updatedUser.roleIds.length === 0) {
+        updatedUser.roleIds = [updatedUser.role || "student"];
+      }
+      setCurrentUser(updatedUser);
       // Pick first workspace and channel that the user is in
-      const defaultWs = user.workspaces[0] || "nst";
+      const defaultWs = updatedUser.workspaces[0] || "nst";
       setCurrentWorkspaceId(defaultWs);
       const wsChannels = channels.filter((c) => c.workspaceId === defaultWs);
       if (wsChannels.length > 0) {
@@ -164,12 +191,14 @@ export function AppProvider({ children }) {
   };
 
   const onboardUser = (profileData) => {
+    const defaultRole = profileData.role || "student";
     const newUser = {
       id: `user_${Date.now()}`,
       email: profileData.email,
       name: profileData.name,
       avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${profileData.name.replace(/\s+/g, "")}`,
-      role: profileData.role || "student",
+      role: defaultRole,
+      roleIds: [defaultRole],
       branch: profileData.branch || "Unassigned",
       batch: profileData.batch || "2026",
       interests: profileData.interests || [],
@@ -180,6 +209,89 @@ export function AppProvider({ children }) {
     
     setUsers((prev) => [...prev, newUser]);
     setCurrentUser(newUser);
+  };
+
+  // Permission Verification Helper
+  const hasPermission = (user, permission, channel = null) => {
+    if (!user) return false;
+    const userRoles = user.roleIds || [user.role] || [];
+    
+    // Admins and Platform Administrators bypass all permission checks
+    if (userRoles.includes("inst_admin") || userRoles.includes("platform_admin")) {
+      return true;
+    }
+
+    // Accumulate all permissions for the user's roles
+    const allowed = new Set();
+    userRoles.forEach(roleId => {
+      const roleDef = roles[roleId];
+      if (roleDef && roleDef.permissions) {
+        roleDef.permissions.forEach(p => allowed.add(p));
+      }
+    });
+
+    // Special override: Message sending in general channels is allowed by default for everyone.
+    // In Announcement or read-only channels, check for post_announcements permission.
+    if (permission === "send_message") {
+      if (channel && (channel.category === "Announcements" || channel.isReadOnlyForStudents)) {
+        return allowed.has("post_announcements");
+      }
+      return true;
+    }
+
+    // Handle channel specific context overrides
+    if (channel) {
+      // 2. Academic / Course channels: Faculty & TA can manage/pin
+      if (channel.category === "Academic") {
+        if (permission === "pin_message" || permission === "manage_discussions") {
+          return allowed.has("pin_messages") || allowed.has("manage_discussions") || userRoles.includes("ta");
+        }
+      }
+
+      // 3. Clubs channels: Club Leads and Presidents can manage
+      if (channel.category === "Clubs") {
+        if (permission === "manage_channel") {
+          return allowed.has("manage_channels") || userRoles.includes("club_president");
+        }
+      }
+    }
+
+    // Standard fallback
+    return allowed.has(permission);
+  };
+
+  // Administrative handlers
+  const updateUserRoles = (userId, roleIds) => {
+    setUsers(prev => {
+      const updated = prev.map(u => u.id === userId ? { ...u, roleIds } : u);
+      // Sync currentUser if updated
+      const foundCurrent = updated.find(u => u.id === (currentUser ? currentUser.id : ""));
+      if (foundCurrent) {
+        setCurrentUser(foundCurrent);
+      }
+      return updated;
+    });
+  };
+
+  const updateRolePermissions = (roleId, newPermissions) => {
+    setRoles(prev => ({
+      ...prev,
+      [roleId]: {
+        ...prev[roleId],
+        permissions: newPermissions
+      }
+    }));
+  };
+
+  const updateUserIdentity = (userId, details) => {
+    setUsers(prev => {
+      const updated = prev.map(u => u.id === userId ? { ...u, ...details } : u);
+      const foundCurrent = updated.find(u => u.id === (currentUser ? currentUser.id : ""));
+      if (foundCurrent) {
+        setCurrentUser(foundCurrent);
+      }
+      return updated;
+    });
   };
 
   // Workspace Switcher
@@ -426,6 +538,14 @@ export function AppProvider({ children }) {
     }
   };
 
+  const togglePinMessage = (messageId) => {
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === messageId ? { ...msg, isPinned: !msg.isPinned } : msg
+      )
+    );
+  };
+
   // Direct Message Switcher / Creator
   const getOrCreateDM = (targetUserId) => {
     if (!currentUser) return;
@@ -474,6 +594,93 @@ export function AppProvider({ children }) {
     setCurrentUser(updatedUser);
   };
 
+  // Social Feed Handlers
+  const likeFeedPost = (postId) => {
+    setFeedPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          hasLiked: !post.hasLiked,
+          likes: post.hasLiked ? post.likes - 1 : post.likes + 1
+        };
+      }
+      return post;
+    }));
+  };
+
+  const saveFeedPost = (postId) => {
+    setFeedPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          hasSaved: !post.hasSaved
+        };
+      }
+      return post;
+    }));
+  };
+
+  const addCommentToPost = (postId, text) => {
+    if (!currentUser || !text.trim()) return;
+    setFeedPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        const newComment = {
+          id: `comment_${Date.now()}`,
+          userName: currentUser.name,
+          userAvatar: currentUser.avatar,
+          text,
+          time: "Just now"
+        };
+        return {
+          ...post,
+          comments: [...(post.comments || []), newComment],
+          commentsCount: (post.commentsCount || 0) + 1
+        };
+      }
+      return post;
+    }));
+  };
+
+  const createFeedPost = (postData) => {
+    if (!currentUser) return;
+    const newPost = {
+      id: `feed_post_${Date.now()}`,
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userAvatar: currentUser.avatar,
+      userRoleIds: currentUser.roleIds || [currentUser.role] || ["student"],
+      department: currentUser.branch || "General",
+      time: "Just now",
+      content: postData.content,
+      type: postData.type || "update",
+      bannerColor: postData.bannerColor || null,
+      bannerEmoji: postData.bannerEmoji || null,
+      bannerTitle: postData.bannerTitle || null,
+      bannerSubtitle: postData.bannerSubtitle || null,
+      image: postData.image || null,
+      likes: 0,
+      commentsCount: 0,
+      shares: 0,
+      hasLiked: false,
+      hasSaved: false,
+      comments: []
+    };
+    setFeedPosts(prev => [newPost, ...prev]);
+  };
+
+  const toggleJoinClub = (clubId) => {
+    setRecommendedClubs(prev => prev.map(club => {
+      if (club.id === clubId) {
+        return {
+          ...club,
+          joined: !club.joined,
+          members: club.joined ? club.members - 1 : club.members + 1
+        };
+      }
+      return club;
+    }));
+  };
+
   // Get active workspace details
   const currentWorkspace = workspaces.find((w) => w.id === currentWorkspaceId) || workspaces[0];
 
@@ -482,6 +689,7 @@ export function AppProvider({ children }) {
       value={{
         currentUser,
         users,
+        roles,
         workspaces,
         currentWorkspace,
         currentWorkspaceId,
@@ -507,6 +715,7 @@ export function AppProvider({ children }) {
         sendThreadReply,
         addReaction,
         deleteMessage,
+        togglePinMessage,
         getOrCreateDM,
         updateUserStatus,
         setActiveThreadParentId,
@@ -527,7 +736,20 @@ export function AppProvider({ children }) {
         trending,
         setTrending,
         theme,
-        toggleTheme
+        toggleTheme,
+        hasPermission,
+        updateUserRoles,
+        updateRolePermissions,
+        updateUserIdentity,
+        feedPosts,
+        moments,
+        recommendedClubs,
+        campusStats,
+        likeFeedPost,
+        saveFeedPost,
+        addCommentToPost,
+        createFeedPost,
+        toggleJoinClub
       }}
     >
       {children}
