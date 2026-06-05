@@ -581,7 +581,7 @@ export const initialCommunities = [
     description: "Designing autonomous UAVs, IoT sensors, and micro-controlled nodes.",
     members: 142,
     activity: "9+ updates today",
-    avatar: "🤖"
+    avatar: "https://api.dicebear.com/7.x/initials/svg?seed=RC&backgroundColor=0f172a&textColor=ffffff"
   },
   {
     id: "comm_2",
@@ -589,7 +589,7 @@ export const initialCommunities = [
     description: "Official developer chapter on campus. Workshops, cloud studies, and solutions.",
     members: 318,
     activity: "4+ updates today",
-    avatar: "⚡"
+    avatar: "https://api.dicebear.com/7.x/initials/svg?seed=GC&backgroundColor=0f172a&textColor=ffffff"
   },
   {
     id: "comm_3",
@@ -597,7 +597,7 @@ export const initialCommunities = [
     description: "Weekly contests, DSA walkthroughs, and code optimizations.",
     members: 195,
     activity: "15+ updates today",
-    avatar: "📈"
+    avatar: "https://api.dicebear.com/7.x/initials/svg?seed=CP&backgroundColor=0f172a&textColor=ffffff"
   }
 ];
 
@@ -664,7 +664,7 @@ export const initialMoments = [
     id: "moment_robotics",
     title: "Robotics Club",
     club: "Robotics Club",
-    avatar: "🤖",
+    avatar: "https://api.dicebear.com/7.x/initials/svg?seed=RC&backgroundColor=1e293b&textColor=ffffff",
     coverBg: "linear-gradient(135deg, #1e293b, #0f172a)",
     description: "Sneak peek into our new autonomous UAV drone test flights! Team calibrating LIDAR sensors in the courtyard. Recruitment interviews start Monday at 4 PM in Makerspace.",
     views: 124
@@ -673,7 +673,7 @@ export const initialMoments = [
     id: "moment_gdsc",
     title: "GDSC Chapter",
     club: "GDSC Chapter",
-    avatar: "⚡",
+    avatar: "https://api.dicebear.com/7.x/initials/svg?seed=GC&backgroundColor=0284c7&textColor=ffffff",
     coverBg: "linear-gradient(135deg, #0284c7, #075985)",
     description: "Reliving highlights from yesterday's Android Compose workshop. Over 120+ attendees built their first reactive UI. Resource slide deck uploaded in #web-development channel!",
     views: 245
@@ -682,7 +682,7 @@ export const initialMoments = [
     id: "moment_career",
     title: "Placement Cell",
     club: "Placement Desk",
-    avatar: "💼",
+    avatar: "https://api.dicebear.com/7.x/initials/svg?seed=PC&backgroundColor=581c87&textColor=ffffff",
     coverBg: "linear-gradient(135deg, #581c87, #3b0764)",
     description: "Official statistics snapshot for the 2026 graduating batch! BITS, NST, and IIT Delhi workspaces are reporting a combined 88% placement achievement with 14 active corporate drives this week.",
     views: 412
@@ -691,7 +691,7 @@ export const initialMoments = [
     id: "moment_fest",
     title: "NST Fest 2026",
     club: "Cultural Cell",
-    avatar: "🎉",
+    avatar: "https://api.dicebear.com/7.x/initials/svg?seed=NF&backgroundColor=b45309&textColor=ffffff",
     coverBg: "linear-gradient(135deg, #b45309, #78350f)",
     description: "NST Summer Fest teaser is officially out! 3 days of hackathons, music concerts, and tech debates. Guest speaker registrations opening on the portal tonight.",
     views: 386
@@ -700,7 +700,7 @@ export const initialMoments = [
     id: "moment_spotlight",
     title: "Student Spotlight",
     club: "Student Council",
-    avatar: "🌟",
+    avatar: "https://api.dicebear.com/7.x/initials/svg?seed=SS&backgroundColor=065f46&textColor=ffffff",
     coverBg: "linear-gradient(135deg, #065f46, #022c22)",
     description: "Student Spotlight of the week: Priya Patel! Securing an AI Research fellowship at Google Labs. Read her interview on resume building and GitHub portfolio review on the Placement Cell tab.",
     views: 198
@@ -994,7 +994,7 @@ export const initialStories = [
     id: "story_4",
     userId: "user_robotics",
     userName: "Robotics Club",
-    userAvatar: "🤖",
+    userAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=RC&backgroundColor=1e293b&textColor=ffffff",
     media: [
       { id: "s4_m1", type: "image", url: "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", duration: 5000, timestamp: "12h ago" }
     ]
@@ -1003,7 +1003,7 @@ export const initialStories = [
     id: "story_5",
     userId: "user_gdsc",
     userName: "GDSC Chapter",
-    userAvatar: "⚡",
+    userAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=GC&backgroundColor=0284c7&textColor=ffffff",
     media: [
       { id: "s5_m1", type: "image", url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", duration: 5000, timestamp: "1d ago" }
     ]
