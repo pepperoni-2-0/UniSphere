@@ -4849,3 +4849,235 @@ body.dark-mode .chat-message-row.pinned-message {
 .suggestion-action-btn.joined {
   color: var(--text-tertiary);
 }
+
+/* Instagram Story Viewer Overlay */
+.story-viewer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.story-viewer-backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(15, 17, 21, 0.95);
+}
+
+.story-viewer-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.story-viewer-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.story-viewer-container {
+  position: relative;
+  width: 100%;
+  max-width: 450px;
+  height: 90vh;
+  max-height: 900px;
+  background-color: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+}
+
+.story-nav-area {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.story-nav-area.prev {
+  left: 0;
+  width: 30%;
+}
+
+.story-nav-area.next {
+  right: 0;
+  width: 70%;
+}
+
+.story-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.story-media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.story-progress-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 10px;
+  display: flex;
+  gap: 4px;
+  z-index: 20;
+}
+
+.story-progress-bar-bg {
+  flex: 1;
+  height: 2px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.story-progress-bar-fill {
+  height: 100%;
+  background-color: #fff;
+  width: 0%;
+}
+
+.story-progress-bar-fill.completed {
+  width: 100%;
+}
+
+@keyframes fillProgress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.story-progress-bar-fill.active {
+  animation-name: fillProgress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.story-header {
+  position: absolute;
+  top: 24px;
+  left: 0;
+  right: 0;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 20;
+}
+
+.story-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.story-header-avatar,
+.story-header-emoji {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.story-header-emoji {
+  background-color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.story-header-name {
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.story-header-time {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.story-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 20;
+}
+
+.story-reply-container {
+  flex: 1;
+}
+
+.story-reply-input {
+  width: 100%;
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 24px;
+  padding: 10px 16px;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.story-reply-input::placeholder {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.story-reply-input:focus {
+  outline: none;
+  border-color: #fff;
+}
+
+.story-action-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.story-action-btn:hover {
+  opacity: 0.8;
+}
+
+.instagram-story-ring.viewed {
+  background: var(--border-subtle);
+}
+
+@media (max-width: 768px) {
+  .story-viewer-container {
+    height: 100vh;
+    height: 100dvh;
+    max-height: none;
+    max-width: none;
+    border-radius: 0;
+  }
+}

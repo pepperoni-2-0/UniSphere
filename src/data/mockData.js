@@ -959,3 +959,53 @@ export const initialNotifications = [
   }
 ];
 
+export const initialStories = [
+  {
+    id: "story_1",
+    userId: "user_aarav",
+    userName: "Aarav",
+    userAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav",
+    media: [
+      { id: "s1_m1", type: "image", url: "https://images.unsplash.com/photo-1506744626753-1fa44df31c7f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", duration: 5000, timestamp: "2h ago" },
+      { id: "s1_m2", type: "image", url: "https://images.unsplash.com/photo-1532767153582-b1a0e5145009?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", duration: 5000, timestamp: "1h ago" }
+    ]
+  },
+  {
+    id: "story_2",
+    userId: "user_priya",
+    userName: "Priya",
+    userAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Priya",
+    media: [
+      { id: "s2_m1", type: "image", url: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", duration: 5000, timestamp: "4h ago" }
+    ]
+  },
+  {
+    id: "story_3",
+    userId: "user_kabir",
+    userName: "Kabir",
+    userAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Kabir",
+    media: [
+      { id: "s3_m1", type: "image", url: "https://images.unsplash.com/photo-1470071131384-001b85755536?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", duration: 5000, timestamp: "5h ago" },
+      { id: "s3_m2", type: "image", url: "https://images.unsplash.com/photo-1444464666168-49b626f86a1a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", duration: 5000, timestamp: "3h ago" },
+      { id: "s3_m3", type: "image", url: "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", duration: 5000, timestamp: "2h ago" }
+    ]
+  },
+  {
+    id: "story_4",
+    userId: "user_robotics",
+    userName: "Robotics Club",
+    userAvatar: "🤖",
+    media: [
+      { id: "s4_m1", type: "image", url: "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", duration: 5000, timestamp: "12h ago" }
+    ]
+  },
+  {
+    id: "story_5",
+    userId: "user_gdsc",
+    userName: "GDSC Chapter",
+    userAvatar: "⚡",
+    media: [
+      { id: "s5_m1", type: "image", url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", duration: 5000, timestamp: "1d ago" }
+    ]
+  }
+];
