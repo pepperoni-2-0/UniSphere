@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../context/AppContext';
+import { initialStories } from '../data/mockData';
 import { 
   Home, 
   Megaphone, 
@@ -102,6 +103,21 @@ const MainAppLayout = () => {
   const [appMode, setAppMode] = useState('workspace'); // workspace, social
   const [activeSocialTab, setActiveSocialTab] = useState('feed'); // feed, explore, messages, profile
   const [profileViewUser, setProfileViewUser] = useState(null);
+  
+  // Story Viewer State
+  const [activeStoryIndex, setActiveStoryIndex] = useState(null);
+  const [activeMediaIndex, setActiveMediaIndex] = useState(0);
+  const [isStoryPaused, setIsStoryPaused] = useState(false);
+  const [viewedStories, setViewedStories] = useState(() => {
+    try {
+      const stored = localStorage.getItem('unisphere_viewed_stories');
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const storyTimerRef = useRef(null);
   const [showModeDropdown, setShowModeDropdown] = useState(false);
   const [composerAttachedImage, setComposerAttachedImage] = useState(null); // url path
   const [selectedSocialPeerId, setSelectedSocialPeerId] = useState('user_aarav'); // default message peer
@@ -163,6 +179,60 @@ const MainAppLayout = () => {
       }
     });
     return highestRole;
+  };
+
+  // Story Viewer Logic
+  useEffect(() => {
+    if (activeStoryIndex !== null) {
+      const currentStory = initialStories[activeStoryIndex];
+      const currentMedia = currentStory.media[activeMediaIndex];
+      
+      // Mark current story as viewed
+      setViewedStories(prev => {
+        const next = { ...prev, [currentStory.id]: true };
+        localStorage.setItem('unisphere_viewed_stories', JSON.stringify(next));
+        return next;
+      });
+
+      if (!isStoryPaused) {
+        storyTimerRef.current = setTimeout(() => {
+          handleNextStoryMedia();
+        }, currentMedia.duration || 5000);
+      }
+    }
+    return () => {
+      if (storyTimerRef.current) clearTimeout(storyTimerRef.current);
+    };
+  }, [activeStoryIndex, activeMediaIndex, isStoryPaused]);
+
+  const handleNextStoryMedia = () => {
+    if (activeStoryIndex === null) return;
+    const currentStory = initialStories[activeStoryIndex];
+    if (activeMediaIndex < currentStory.media.length - 1) {
+      setActiveMediaIndex(activeMediaIndex + 1);
+    } else if (activeStoryIndex < initialStories.length - 1) {
+      setActiveStoryIndex(activeStoryIndex + 1);
+      setActiveMediaIndex(0);
+    } else {
+      closeStoryViewer();
+    }
+  };
+
+  const handlePrevStoryMedia = () => {
+    if (activeStoryIndex === null) return;
+    if (activeMediaIndex > 0) {
+      setActiveMediaIndex(activeMediaIndex - 1);
+    } else if (activeStoryIndex > 0) {
+      setActiveStoryIndex(activeStoryIndex - 1);
+      const prevStory = initialStories[activeStoryIndex - 1];
+      setActiveMediaIndex(prevStory.media.length - 1);
+    }
+  };
+
+  const closeStoryViewer = () => {
+    setActiveStoryIndex(null);
+    setActiveMediaIndex(0);
+    setIsStoryPaused(false);
   };
 
   // Helper to render badges
@@ -883,56 +953,25 @@ const MainAppLayout = () => {
                         <span className="instagram-story-label">Your Story</span>
                       </div>
 
-                      {/* Close Friend 1 Story */}
-                      <div 
-                        className="instagram-story-item"
-                        onClick={() => setSelectedMoment({
-                          id: "moment_close_1",
-                          title: "Makerspace UAV test",
-                          club: "Aarav Mehta ⭐",
-                          avatar: "🔬",
-                          coverBg: "linear-gradient(135deg, #059669, #022c22)",
-                          description: "Calibrated drone evasion sensors in the courtyard! Evasion works on tree-partitioning trees model. Pushed code changes on the main CP Hub files desk.",
-                          views: 142
-                        })}
-                      >
-                        <div className="instagram-story-ring close-friend">
-                          <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav" alt="Aarav" className="instagram-story-avatar" />
-                        </div>
-                        <span className="instagram-story-label">Aarav</span>
-                      </div>
-
-                      {/* Close Friend 2 Story */}
-                      <div 
-                        className="instagram-story-item"
-                        onClick={() => setSelectedMoment({
-                          id: "moment_close_2",
-                          title: "Google AI Fellowship",
-                          club: "Priya Patel ⭐",
-                          avatar: "💼",
-                          coverBg: "linear-gradient(135deg, #7c3aed, #1e1b4b)",
-                          description: "Secured the Google AI fellowship! Preparing resume guidelines and portfolio review guidelines to share with NST students.",
-                          views: 298
-                        })}
-                      >
-                        <div className="instagram-story-ring close-friend">
-                          <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Priya" alt="Priya" className="instagram-story-avatar" />
-                        </div>
-                        <span className="instagram-story-label">Priya</span>
-                      </div>
-
-                      {moments.map(moment => {
-                        const name = moment.club.split(" NST")[0].split(" ")[0];
+                      {initialStories.map((story, index) => {
+                        const isViewed = viewedStories[story.id];
                         return (
                           <div 
-                            key={moment.id} 
+                            key={story.id} 
                             className="instagram-story-item" 
-                            onClick={() => setSelectedMoment(moment)}
+                            onClick={() => {
+                              setActiveStoryIndex(index);
+                              setActiveMediaIndex(0);
+                            }}
                           >
-                            <div className="instagram-story-ring normal-story">
-                              <span className="instagram-story-avatar-emoji">{moment.avatar}</span>
+                            <div className={`instagram-story-ring ${isViewed ? 'viewed' : 'close-friend'}`}>
+                              {story.userAvatar.startsWith('http') ? (
+                                <img src={story.userAvatar} alt={story.userName} className="instagram-story-avatar" />
+                              ) : (
+                                <span className="instagram-story-avatar-emoji">{story.userAvatar}</span>
+                              )}
                             </div>
-                            <span className="instagram-story-label">{name}</span>
+                            <span className="instagram-story-label">{story.userName}</span>
                           </div>
                         );
                       })}
@@ -3246,6 +3285,71 @@ const MainAppLayout = () => {
                 >
                   Close
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Instagram Story Viewer Overlay */}
+      {activeStoryIndex !== null && (
+        <div className="story-viewer-overlay">
+          <div className="story-viewer-backdrop" onClick={closeStoryViewer}></div>
+          <button className="story-viewer-close" onClick={closeStoryViewer}>
+            <X size={24} />
+          </button>
+          
+          <div className="story-viewer-container">
+            {/* Previous button overlay area */}
+            <div className="story-nav-area prev" onClick={handlePrevStoryMedia}></div>
+            
+            {/* Next button overlay area */}
+            <div className="story-nav-area next" onClick={handleNextStoryMedia}></div>
+            
+            <div className="story-content" 
+                 onMouseDown={() => setIsStoryPaused(true)} 
+                 onMouseUp={() => setIsStoryPaused(false)}
+                 onTouchStart={() => setIsStoryPaused(true)}
+                 onTouchEnd={() => setIsStoryPaused(false)}
+            >
+              <div className="story-progress-container">
+                {initialStories[activeStoryIndex].media.map((m, idx) => (
+                  <div key={m.id} className="story-progress-bar-bg">
+                    <div 
+                      className={`story-progress-bar-fill ${idx < activeMediaIndex ? 'completed' : ''} ${idx === activeMediaIndex && !isStoryPaused ? 'active' : ''}`}
+                      style={{ 
+                        animationDuration: `${m.duration}ms`,
+                        animationPlayState: isStoryPaused ? 'paused' : 'running'
+                      }}
+                    ></div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="story-header">
+                <div className="story-header-left">
+                  {initialStories[activeStoryIndex].userAvatar.startsWith('http') ? (
+                    <img src={initialStories[activeStoryIndex].userAvatar} alt="" className="story-header-avatar" />
+                  ) : (
+                    <span className="story-header-emoji">{initialStories[activeStoryIndex].userAvatar}</span>
+                  )}
+                  <span className="story-header-name">{initialStories[activeStoryIndex].userName}</span>
+                  <span className="story-header-time">{initialStories[activeStoryIndex].media[activeMediaIndex].timestamp}</span>
+                </div>
+              </div>
+
+              <img 
+                src={initialStories[activeStoryIndex].media[activeMediaIndex].url} 
+                alt="Story content" 
+                className="story-media" 
+              />
+              
+              <div className="story-footer">
+                <div className="story-reply-container">
+                  <input type="text" placeholder={`Reply to ${initialStories[activeStoryIndex].userName}...`} className="story-reply-input" />
+                </div>
+                <button className="story-action-btn"><Heart size={24} /></button>
+                <button className="story-action-btn"><Send size={24} /></button>
               </div>
             </div>
           </div>
