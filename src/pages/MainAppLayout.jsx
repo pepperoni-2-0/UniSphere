@@ -104,10 +104,14 @@ const MainAppLayout = () => {
   const [activeSocialTab, setActiveSocialTab] = useState('feed'); // feed, explore, messages, profile
   const [profileViewUser, setProfileViewUser] = useState(null);
   
-  // Story Viewer State
+  // Story Viewer & Creator State
+  const [localStories, setLocalStories] = useState(initialStories);
   const [activeStoryIndex, setActiveStoryIndex] = useState(null);
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const [isStoryPaused, setIsStoryPaused] = useState(false);
+  const [showStoryCreator, setShowStoryCreator] = useState(false);
+  const [storyPreviewUrl, setStoryPreviewUrl] = useState(null);
+  
   const [viewedStories, setViewedStories] = useState(() => {
     try {
       const stored = localStorage.getItem('unisphere_viewed_stories');
@@ -184,33 +188,37 @@ const MainAppLayout = () => {
   // Story Viewer Logic
   useEffect(() => {
     if (activeStoryIndex !== null) {
-      const currentStory = initialStories[activeStoryIndex];
-      const currentMedia = currentStory.media[activeMediaIndex];
-      
+      const currentStory = localStories[activeStoryIndex];
       // Mark current story as viewed
       setViewedStories(prev => {
         const next = { ...prev, [currentStory.id]: true };
         localStorage.setItem('unisphere_viewed_stories', JSON.stringify(next));
         return next;
       });
-
-      if (!isStoryPaused) {
-        storyTimerRef.current = setTimeout(() => {
-          handleNextStoryMedia();
-        }, currentMedia.duration || 5000);
-      }
     }
-    return () => {
-      if (storyTimerRef.current) clearTimeout(storyTimerRef.current);
+  }, [activeStoryIndex, localStories]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (activeStoryIndex !== null) {
+        if (e.key === 'Escape') {
+          closeStoryViewer();
+        } else if (e.key === ' ' || e.code === 'Space') {
+          e.preventDefault();
+          setIsStoryPaused(prev => !prev);
+        }
+      }
     };
-  }, [activeStoryIndex, activeMediaIndex, isStoryPaused]);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeStoryIndex]);
 
   const handleNextStoryMedia = () => {
     if (activeStoryIndex === null) return;
-    const currentStory = initialStories[activeStoryIndex];
+    const currentStory = localStories[activeStoryIndex];
     if (activeMediaIndex < currentStory.media.length - 1) {
       setActiveMediaIndex(activeMediaIndex + 1);
-    } else if (activeStoryIndex < initialStories.length - 1) {
+    } else if (activeStoryIndex < localStories.length - 1) {
       setActiveStoryIndex(activeStoryIndex + 1);
       setActiveMediaIndex(0);
     } else {
@@ -224,7 +232,7 @@ const MainAppLayout = () => {
       setActiveMediaIndex(activeMediaIndex - 1);
     } else if (activeStoryIndex > 0) {
       setActiveStoryIndex(activeStoryIndex - 1);
-      const prevStory = initialStories[activeStoryIndex - 1];
+      const prevStory = localStories[activeStoryIndex - 1];
       setActiveMediaIndex(prevStory.media.length - 1);
     }
   };
@@ -233,6 +241,54 @@ const MainAppLayout = () => {
     setActiveStoryIndex(null);
     setActiveMediaIndex(0);
     setIsStoryPaused(false);
+  };
+  
+  // Story Creator Logic
+  const handleStoryImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setStoryPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handlePostStory = () => {
+    if (!storyPreviewUrl) return;
+    
+    // Check if current user already has a story
+    const currentUserStoryIdx = localStories.findIndex(s => s.userId === currentUser.id);
+    let updatedStories = [...localStories];
+    
+    const newMedia = {
+      id: `m_${Date.now()}`,
+      type: 'image',
+      url: storyPreviewUrl,
+      duration: 5000,
+      timestamp: "Just now"
+    };
+
+    if (currentUserStoryIdx >= 0) {
+      // Append to existing story
+      updatedStories[currentUserStoryIdx] = {
+        ...updatedStories[currentUserStoryIdx],
+        media: [...updatedStories[currentUserStoryIdx].media, newMedia]
+      };
+      // Move it to the front
+      const myStory = updatedStories.splice(currentUserStoryIdx, 1)[0];
+      updatedStories.unshift(myStory);
+    } else {
+      // Create new story object for user
+      updatedStories.unshift({
+        id: `story_${currentUser.id}`,
+        userId: currentUser.id,
+        userName: currentUser.name,
+        userAvatar: currentUser.avatar,
+        media: [newMedia]
+      });
+    }
+
+    setLocalStories(updatedStories);
+    setShowStoryCreator(false);
+    setStoryPreviewUrl(null);
   };
 
   // Helper to render badges
@@ -945,7 +1001,7 @@ const MainAppLayout = () => {
                   <div className="instagram-stories-container">
                     <div className="instagram-stories-track">
                       {/* Your Story */}
-                      <div className="instagram-story-item">
+                      <div className="instagram-story-item" onClick={() => setShowStoryCreator(true)}>
                         <div className="instagram-story-ring your-story">
                           <img src={currentUser?.avatar} alt="Your Story" className="instagram-story-avatar" />
                           <span className="instagram-story-plus">+</span>
@@ -953,7 +1009,7 @@ const MainAppLayout = () => {
                         <span className="instagram-story-label">Your Story</span>
                       </div>
 
-                      {initialStories.map((story, index) => {
+                      {localStories.map((story, index) => {
                         const isViewed = viewedStories[story.id];
                         return (
                           <div 
@@ -965,11 +1021,7 @@ const MainAppLayout = () => {
                             }}
                           >
                             <div className={`instagram-story-ring ${isViewed ? 'viewed' : 'close-friend'}`}>
-                              {story.userAvatar.startsWith('http') ? (
-                                <img src={story.userAvatar} alt={story.userName} className="instagram-story-avatar" />
-                              ) : (
-                                <span className="instagram-story-avatar-emoji">{story.userAvatar}</span>
-                              )}
+                              <img src={story.userAvatar} alt={story.userName} className="instagram-story-avatar" />
                             </div>
                             <span className="instagram-story-label">{story.userName}</span>
                           </div>
@@ -3313,7 +3365,7 @@ const MainAppLayout = () => {
                  onTouchEnd={() => setIsStoryPaused(false)}
             >
               <div className="story-progress-container">
-                {initialStories[activeStoryIndex].media.map((m, idx) => (
+                {localStories[activeStoryIndex].media.map((m, idx) => (
                   <div key={m.id} className="story-progress-bar-bg">
                     <div 
                       className={`story-progress-bar-fill ${idx < activeMediaIndex ? 'completed' : ''} ${idx === activeMediaIndex && !isStoryPaused ? 'active' : ''}`}
@@ -3321,6 +3373,7 @@ const MainAppLayout = () => {
                         animationDuration: `${m.duration}ms`,
                         animationPlayState: isStoryPaused ? 'paused' : 'running'
                       }}
+                      onAnimationEnd={idx === activeMediaIndex ? handleNextStoryMedia : undefined}
                     ></div>
                   </div>
                 ))}
@@ -3328,29 +3381,76 @@ const MainAppLayout = () => {
               
               <div className="story-header">
                 <div className="story-header-left">
-                  {initialStories[activeStoryIndex].userAvatar.startsWith('http') ? (
-                    <img src={initialStories[activeStoryIndex].userAvatar} alt="" className="story-header-avatar" />
-                  ) : (
-                    <span className="story-header-emoji">{initialStories[activeStoryIndex].userAvatar}</span>
-                  )}
-                  <span className="story-header-name">{initialStories[activeStoryIndex].userName}</span>
-                  <span className="story-header-time">{initialStories[activeStoryIndex].media[activeMediaIndex].timestamp}</span>
+                  <img src={localStories[activeStoryIndex].userAvatar} alt="" className="story-header-avatar" />
+                  <span className="story-header-name">{localStories[activeStoryIndex].userName}</span>
+                  <span className="story-header-time">{localStories[activeStoryIndex].media[activeMediaIndex].timestamp}</span>
                 </div>
               </div>
 
+              {isStoryPaused && (
+                <div className="story-pause-indicator">
+                  <div className="pause-icon"></div>
+                </div>
+              )}
+
               <img 
-                src={initialStories[activeStoryIndex].media[activeMediaIndex].url} 
+                src={localStories[activeStoryIndex].media[activeMediaIndex].url} 
                 alt="Story content" 
                 className="story-media" 
               />
               
               <div className="story-footer">
                 <div className="story-reply-container">
-                  <input type="text" placeholder={`Reply to ${initialStories[activeStoryIndex].userName}...`} className="story-reply-input" />
+                  <input type="text" placeholder={`Reply to ${localStories[activeStoryIndex].userName}...`} className="story-reply-input" />
                 </div>
                 <button className="story-action-btn"><Heart size={24} /></button>
                 <button className="story-action-btn"><Send size={24} /></button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Story Creator Modal */}
+      {showStoryCreator && (
+        <div className="story-creator-overlay">
+          <div className="story-creator-backdrop" onClick={() => {
+            setShowStoryCreator(false);
+            setStoryPreviewUrl(null);
+          }}></div>
+          <div className="story-creator-modal">
+            <div className="story-creator-header">
+              <h3>Create Story</h3>
+              <button className="btn-close" onClick={() => {
+                setShowStoryCreator(false);
+                setStoryPreviewUrl(null);
+              }}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="story-creator-body">
+              {!storyPreviewUrl ? (
+                <div className="story-upload-area">
+                  <input type="file" id="story-upload-input" accept="image/*" onChange={handleStoryImageUpload} hidden />
+                  <label htmlFor="story-upload-input" className="story-upload-label">
+                    <Plus size={48} />
+                    <span>Upload Image</span>
+                  </label>
+                </div>
+              ) : (
+                <div className="story-preview-area">
+                  <img src={storyPreviewUrl} alt="Preview" className="story-preview-img" />
+                </div>
+              )}
+            </div>
+            <div className="story-creator-footer">
+              <button 
+                className="btn-primary" 
+                onClick={handlePostStory}
+                disabled={!storyPreviewUrl}
+              >
+                Post to Story
+              </button>
             </div>
           </div>
         </div>
