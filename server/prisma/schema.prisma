@@ -1,0 +1,538 @@
+// ============================================================================
+// UniSphere — Prisma Schema
+// Matches server/sql/001_schema.sql exactly
+// ============================================================================
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserStatusEnum {
+  ACTIVE
+  SUSPENDED
+  GRADUATED
+
+  @@map("user_status_enum")
+}
+
+enum PostVisibilityEnum {
+  ALL_NST
+  CAMPUS_ONLY
+
+  @@map("post_visibility_enum")
+}
+
+enum ConnectionStatusEnum {
+  PENDING
+  ACCEPTED
+  BLOCKED
+
+  @@map("connection_status_enum")
+}
+
+enum ChannelTypeEnum {
+  ANNOUNCEMENT
+  ACADEMIC
+  BATCH_BRANCH
+  CLUB
+  GENERAL
+
+  @@map("channel_type_enum")
+}
+
+enum NotificationTypeEnum {
+  MENTION
+  REPLY
+  EVENT
+  SYSTEM
+  CHANNEL_INVITE
+
+  @@map("notification_type_enum")
+}
+
+enum ModerationActionEnum {
+  FLAGGED
+  REMOVED
+  WARNED
+  BANNED
+
+  @@map("moderation_action_enum")
+}
+
+enum EventScopeEnum {
+  ALL_NST
+  CAMPUS_ONLY
+
+  @@map("event_scope_enum")
+}
+
+enum StoryMediaTypeEnum {
+  TEXT
+  IMAGE
+  VIDEO
+
+  @@map("story_media_type_enum")
+}
+
+enum ChatTypeEnum {
+  DIRECT
+  GROUP
+
+  @@map("chat_type_enum")
+}
+
+// ============================================================================
+// MODELS
+// ============================================================================
+
+// ─── 1. Campus ──────────────────────────────────────────────────────────────
+
+model Campus {
+  id        String    @id @default(uuid()) @map("id") @db.Uuid
+  name      String    @map("name") @db.VarChar(255)
+  shortName String    @map("short_name") @db.VarChar(10)
+  code      String    @unique @map("code") @db.VarChar(20)
+  logoUrl   String?   @map("logo_url") @db.Text
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz()
+
+  // Relations
+  users            User[]
+  officialChannels OfficialChannel[]
+  socialPosts      SocialPost[]
+  stories          Story[]
+  events           Event[]
+
+  @@map("campuses")
+}
+
+// ─── 2. Role ────────────────────────────────────────────────────────────────
+
+model Role {
+  id          String   @id @default(uuid()) @map("id") @db.Uuid
+  name        String   @unique @map("name") @db.VarChar(50)
+  description String?  @map("description") @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  // NO deletedAt
+
+  // Relations
+  users              User[]
+  alumniTransitions  AlumniTransition[]
+
+  @@map("roles")
+}
+
+// ─── 3. User ────────────────────────────────────────────────────────────────
+
+model User {
+  id                         String          @id @default(uuid()) @map("id") @db.Uuid
+  roleId                     String          @map("role_id") @db.Uuid
+  primaryCampusId            String          @map("primary_campus_id") @db.Uuid
+  officialEmail              String          @unique @map("official_email") @db.VarChar(255)
+  personalEmail              String?         @map("personal_email") @db.VarChar(255)
+  personalEmailVerified      Boolean         @default(false) @map("personal_email_verified")
+  emailVerificationToken     String?         @map("email_verification_token") @db.VarChar(255)
+  emailVerificationExpiresAt DateTime?       @map("email_verification_expires_at") @db.Timestamptz()
+  passwordHash               String          @map("password_hash") @db.VarChar(255)
+  firstName                  String          @map("first_name") @db.VarChar(100)
+  lastName                   String          @map("last_name") @db.VarChar(100)
+  displayName                String          @map("display_name") @db.VarChar(200)
+  avatarUrl                  String?         @map("avatar_url") @db.Text
+  branch                     String?         @map("branch") @db.VarChar(255)
+  batch                      String?         @map("batch") @db.VarChar(50)
+  bio                        String?         @map("bio") @db.Text
+  status                     UserStatusEnum  @default(ACTIVE) @map("status")
+  customStatusText           String?         @map("custom_status_text") @db.VarChar(255)
+  lastSeenAt                 DateTime?       @map("last_seen_at") @db.Timestamptz()
+  createdAt                  DateTime        @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt                  DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  deletedAt                  DateTime?       @map("deleted_at") @db.Timestamptz()
+
+  // FK Relations
+  role          Role    @relation(fields: [roleId], references: [id])
+  primaryCampus Campus  @relation(fields: [primaryCampusId], references: [id])
+
+  // Reverse relations
+  alumniTransition        AlumniTransition?
+  createdChannels         OfficialChannel[]     @relation("ChannelCreator")
+  channelMemberships      ChannelMember[]
+  officialMessagesSent    OfficialMessage[]
+  socialPosts             SocialPost[]
+  stories                 Story[]
+  connectionsSent         Connection[]          @relation("ConnectionRequester")
+  connectionsReceived     Connection[]          @relation("ConnectionAddressee")
+  uploadedMedia           Media[]
+  organizedEvents         Event[]
+  createdChats            Chat[]
+  chatParticipations      ChatParticipant[]
+  chatMessagesSent        ChatMessage[]
+  notificationsReceived   Notification[]        @relation("NotificationRecipient")
+  notificationsSent       Notification[]        @relation("NotificationSender")
+  auditLogs               AuditLog[]
+  contentModerationLogs   ContentModerationLog[]
+
+  @@index([roleId])
+  @@index([primaryCampusId])
+  @@map("users")
+}
+
+// ─── 4. AlumniTransition ────────────────────────────────────────────────────
+
+model AlumniTransition {
+  id                          String   @id @default(uuid()) @map("id") @db.Uuid
+  userId                      String   @unique @map("user_id") @db.Uuid
+  transitionedAt              DateTime @default(now()) @map("transitioned_at") @db.Timestamptz()
+  officialEmailRevoked        Boolean  @default(false) @map("official_email_revoked")
+  personalEmailAtTransition   String   @map("personal_email_at_transition") @db.VarChar(255)
+  previousRoleId              String   @map("previous_role_id") @db.Uuid
+  notes                       String?  @map("notes") @db.Text
+  createdAt                   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt                   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  // NO deletedAt
+
+  // FK Relations
+  user         User @relation(fields: [userId], references: [id])
+  previousRole Role @relation(fields: [previousRoleId], references: [id])
+
+  @@index([userId])
+  @@index([previousRoleId])
+  @@map("alumni_transitions")
+}
+
+// ─── 5. OfficialChannel ────────────────────────────────────────────────────
+
+model OfficialChannel {
+  id                      String          @id @default(uuid()) @map("id") @db.Uuid
+  campusId                String          @map("campus_id") @db.Uuid
+  name                    String          @map("name") @db.VarChar(255)
+  slug                    String          @map("slug") @db.VarChar(255)
+  description             String?         @map("description") @db.Text
+  channelType             ChannelTypeEnum @default(GENERAL) @map("channel_type")
+  isReadOnlyForStudents   Boolean         @default(false) @map("is_read_only_for_students")
+  createdById             String?         @map("created_by") @db.Uuid
+  createdAt               DateTime        @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt               DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  deletedAt               DateTime?       @map("deleted_at") @db.Timestamptz()
+
+  // FK Relations
+  campus    Campus @relation(fields: [campusId], references: [id])
+  createdBy User?  @relation("ChannelCreator", fields: [createdById], references: [id])
+
+  // Reverse relations
+  members  ChannelMember[]
+  messages OfficialMessage[]
+
+  @@unique([campusId, slug])
+  @@index([campusId])
+  @@index([createdById])
+  @@map("official_channels")
+}
+
+// ─── 6. ChannelMember ──────────────────────────────────────────────────────
+
+model ChannelMember {
+  id        String    @id @default(uuid()) @map("id") @db.Uuid
+  channelId String    @map("channel_id") @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  joinedAt  DateTime  @default(now()) @map("joined_at") @db.Timestamptz()
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz()
+
+  // FK Relations
+  channel OfficialChannel @relation(fields: [channelId], references: [id])
+  user    User            @relation(fields: [userId], references: [id])
+
+  @@unique([channelId, userId])
+  @@index([channelId])
+  @@index([userId])
+  @@map("channel_members")
+}
+
+// ─── 7. OfficialMessage ────────────────────────────────────────────────────
+
+model OfficialMessage {
+  id              String    @id @default(uuid()) @map("id") @db.Uuid
+  channelId       String    @map("channel_id") @db.Uuid
+  senderId        String    @map("sender_id") @db.Uuid
+  content         String    @map("content") @db.Text
+  parentMessageId String?   @map("parent_message_id") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
+
+  // FK Relations
+  channel       OfficialChannel  @relation(fields: [channelId], references: [id])
+  sender        User             @relation(fields: [senderId], references: [id])
+  parentMessage OfficialMessage? @relation("MessageThread", fields: [parentMessageId], references: [id])
+
+  // Reverse relations (self-ref)
+  replies OfficialMessage[] @relation("MessageThread")
+
+  @@index([channelId])
+  @@index([senderId])
+  @@index([parentMessageId])
+  @@map("official_messages")
+}
+
+// ─── 8. SocialPost ─────────────────────────────────────────────────────────
+
+model SocialPost {
+  id            String             @id @default(uuid()) @map("id") @db.Uuid
+  authorId      String             @map("author_id") @db.Uuid
+  campusId      String             @map("campus_id") @db.Uuid
+  content       String             @map("content") @db.Text
+  visibility    PostVisibilityEnum @default(CAMPUS_ONLY) @map("visibility")
+  likesCount    Int                @default(0) @map("likes_count")
+  commentsCount Int                @default(0) @map("comments_count")
+  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  deletedAt     DateTime?          @map("deleted_at") @db.Timestamptz()
+
+  // FK Relations
+  author User   @relation(fields: [authorId], references: [id])
+  campus Campus @relation(fields: [campusId], references: [id])
+
+  @@index([authorId])
+  @@index([campusId])
+  @@map("social_posts")
+}
+
+// ─── 9. Story ──────────────────────────────────────────────────────────────
+
+model Story {
+  id         String              @id @default(uuid()) @map("id") @db.Uuid
+  authorId   String              @map("author_id") @db.Uuid
+  campusId   String              @map("campus_id") @db.Uuid
+  content    String?             @map("content") @db.Text
+  mediaUrl   String?             @map("media_url") @db.Text
+  mediaType  StoryMediaTypeEnum  @default(TEXT) @map("media_type")
+  visibility PostVisibilityEnum  @default(CAMPUS_ONLY) @map("visibility")
+  expiresAt  DateTime            @map("expires_at") @db.Timestamptz()
+  createdAt  DateTime            @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt  DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  deletedAt  DateTime?           @map("deleted_at") @db.Timestamptz()
+
+  // FK Relations
+  author User   @relation(fields: [authorId], references: [id])
+  campus Campus @relation(fields: [campusId], references: [id])
+
+  @@index([authorId])
+  @@index([campusId])
+  @@map("stories")
+}
+
+// ─── 10. Connection ────────────────────────────────────────────────────────
+
+model Connection {
+  id          String               @id @default(uuid()) @map("id") @db.Uuid
+  requesterId String               @map("requester_id") @db.Uuid
+  addresseeId String               @map("addressee_id") @db.Uuid
+  status      ConnectionStatusEnum @default(PENDING) @map("status")
+  createdAt   DateTime             @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  // NO deletedAt
+
+  // FK Relations
+  requester User @relation("ConnectionRequester", fields: [requesterId], references: [id])
+  addressee User @relation("ConnectionAddressee", fields: [addresseeId], references: [id])
+
+  @@unique([requesterId, addresseeId])
+  @@index([requesterId])
+  @@index([addresseeId])
+  @@map("connections")
+}
+
+// ─── 11. Media ─────────────────────────────────────────────────────────────
+
+model Media {
+  id               String    @id @default(uuid()) @map("id") @db.Uuid
+  uploaderId       String    @map("uploader_id") @db.Uuid
+  entityType       String    @map("entity_type") @db.VarChar(50)
+  entityId         String    @map("entity_id") @db.Uuid
+  url              String    @map("url") @db.Text
+  mimeType         String    @map("mime_type") @db.VarChar(100)
+  fileSizeBytes    BigInt?   @map("file_size_bytes")
+  originalFilename String?   @map("original_filename") @db.VarChar(255)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz()
+
+  // FK Relations
+  uploader User @relation(fields: [uploaderId], references: [id])
+
+  @@index([uploaderId])
+  @@index([entityType, entityId])
+  @@map("media")
+}
+
+// ─── 12. Event ─────────────────────────────────────────────────────────────
+
+model Event {
+  id          String         @id @default(uuid()) @map("id") @db.Uuid
+  campusId    String?        @map("campus_id") @db.Uuid
+  organizerId String         @map("organizer_id") @db.Uuid
+  title       String         @map("title") @db.VarChar(255)
+  description String?        @map("description") @db.Text
+  location    String?        @map("location") @db.VarChar(255)
+  eventDate   DateTime       @map("event_date") @db.Timestamptz()
+  endDate     DateTime?      @map("end_date") @db.Timestamptz()
+  scope       EventScopeEnum @default(CAMPUS_ONLY) @map("scope")
+  rsvpCount   Int            @default(0) @map("rsvp_count")
+  tag         String?        @map("tag") @db.VarChar(100)
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  deletedAt   DateTime?      @map("deleted_at") @db.Timestamptz()
+
+  // FK Relations
+  campus    Campus? @relation(fields: [campusId], references: [id])
+  organizer User    @relation(fields: [organizerId], references: [id])
+
+  @@index([campusId])
+  @@index([organizerId])
+  @@map("events")
+}
+
+// ─── 13. Chat ──────────────────────────────────────────────────────────────
+
+model Chat {
+  id        String       @id @default(uuid()) @map("id") @db.Uuid
+  chatType  ChatTypeEnum @map("chat_type")
+  name      String?      @map("name") @db.VarChar(255)
+  createdById String?    @map("created_by") @db.Uuid
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  deletedAt DateTime?    @map("deleted_at") @db.Timestamptz()
+
+  // FK Relations
+  createdBy User? @relation(fields: [createdById], references: [id])
+
+  // Reverse relations
+  participants ChatParticipant[]
+  messages     ChatMessage[]
+
+  @@index([createdById])
+  @@map("chats")
+}
+
+// ─── 14. ChatParticipant ───────────────────────────────────────────────────
+
+model ChatParticipant {
+  id         String    @id @default(uuid()) @map("id") @db.Uuid
+  chatId     String    @map("chat_id") @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  joinedAt   DateTime  @default(now()) @map("joined_at") @db.Timestamptz()
+  lastReadAt DateTime? @map("last_read_at") @db.Timestamptz()
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz()
+
+  // FK Relations
+  chat Chat @relation(fields: [chatId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([chatId, userId])
+  @@index([chatId])
+  @@index([userId])
+  @@map("chat_participants")
+}
+
+// ─── 15. ChatMessage ───────────────────────────────────────────────────────
+
+model ChatMessage {
+  id        String    @id @default(uuid()) @map("id") @db.Uuid
+  chatId    String    @map("chat_id") @db.Uuid
+  senderId  String    @map("sender_id") @db.Uuid
+  content   String    @map("content") @db.Text
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz()
+
+  // FK Relations
+  chat   Chat @relation(fields: [chatId], references: [id])
+  sender User @relation(fields: [senderId], references: [id])
+
+  @@index([chatId])
+  @@index([senderId])
+  @@map("chat_messages")
+}
+
+// ─── 16. Notification ──────────────────────────────────────────────────────
+
+model Notification {
+  id          String               @id @default(uuid()) @map("id") @db.Uuid
+  recipientId String               @map("recipient_id") @db.Uuid
+  senderId    String?              @map("sender_id") @db.Uuid
+  type        NotificationTypeEnum @map("type")
+  title       String               @map("title") @db.VarChar(255)
+  body        String?              @map("body") @db.Text
+  entityType  String?              @map("entity_type") @db.VarChar(100)
+  entityId    String?              @map("entity_id") @db.Uuid
+  isRead      Boolean              @default(false) @map("is_read")
+  readAt      DateTime?            @map("read_at") @db.Timestamptz()
+  createdAt   DateTime             @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  // NO deletedAt
+
+  // FK Relations
+  recipient User  @relation("NotificationRecipient", fields: [recipientId], references: [id])
+  sender    User? @relation("NotificationSender", fields: [senderId], references: [id])
+
+  @@index([recipientId])
+  @@index([senderId])
+  @@index([recipientId, isRead])
+  @@map("notifications")
+}
+
+// ─── 17. AuditLog (append-only) ────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(uuid()) @map("id") @db.Uuid
+  actorId    String?  @map("actor_id") @db.Uuid
+  action     String   @map("action") @db.VarChar(255)
+  entityType String   @map("entity_type") @db.VarChar(100)
+  entityId   String?  @map("entity_id") @db.Uuid
+  details    Json     @default("{}") @map("details") @db.JsonB
+  ipAddress  String?  @map("ip_address") @db.VarChar(45)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  // ONLY created_at — append-only
+
+  // FK Relations
+  actor User? @relation(fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
+
+// ─── 18. ContentModerationLog ──────────────────────────────────────────────
+
+model ContentModerationLog {
+  id               String               @id @default(uuid()) @map("id") @db.Uuid
+  moderatorId      String               @map("moderator_id") @db.Uuid
+  targetEntityType String               @map("target_entity_type") @db.VarChar(100)
+  targetEntityId   String               @map("target_entity_id") @db.Uuid
+  action           ModerationActionEnum @map("action")
+  reason           String?              @map("reason") @db.Text
+  details          Json                 @default("{}") @map("details") @db.JsonB
+  createdAt        DateTime             @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt        DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  // NO deletedAt
+
+  // FK Relations
+  moderator User @relation(fields: [moderatorId], references: [id])
+
+  @@index([moderatorId])
+  @@map("content_moderation_logs")
+}
