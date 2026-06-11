@@ -3,6 +3,11 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import alumniRoutes from "./routes/alumni.routes.js";
+import connectionRoutes from "./routes/connection.routes.js";
+import campusRoutes from "./routes/campus.routes.js";
+import channelRoutes from "./routes/channel.routes.js";
 
 dotenv.config();
 
@@ -19,6 +24,11 @@ app.use(cors({
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/alumni", alumniRoutes);
+app.use("/api/v1/connections", connectionRoutes);
+app.use("/api/v1/campuses", campusRoutes);
+app.use("/api/v1/channels", channelRoutes);
 
 // Health check
 app.get("/api/v1/health", (req, res) => {
