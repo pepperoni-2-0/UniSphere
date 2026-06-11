@@ -384,15 +384,18 @@ export class OfficialChannelService {
   /**
    * Send a new message to an official channel.
    * Validates sender role, membership status, and read-only constraints for students.
+   * Supports threaded replies if parentMessageId is provided.
    *
    * @param channelId - Target channel.
    * @param userId - Sending user ID.
    * @param content - Message content.
+   * @param parentMessageId - Optional parent message ID for replies.
    */
   async sendMessage(
     channelId: string,
     userId: string,
     content: string,
+    parentMessageId?: string,
   ): Promise<ServiceResult<{ messageId: string }>> {
     try {
       // 1. Fetch user and check alumni ───────────────────────────────────────
@@ -460,13 +463,28 @@ export class OfficialChannelService {
         };
       }
 
-      // 5. Create message ────────────────────────────────────────────────────
+      // 5. Verify parent message if threaded reply
+      if (parentMessageId) {
+        const parentMsg = await prisma.officialMessage.findFirst({
+          where: { id: parentMessageId, channelId, deletedAt: null },
+        });
+        if (!parentMsg) {
+          return {
+            success: false,
+            error: 'Parent message not found in this channel',
+            code: 'NOT_FOUND' as ErrorCode,
+          };
+        }
+      }
+
+      // 6. Create message ────────────────────────────────────────────────────
       const messageId = await prisma.$transaction(async (tx) => {
         const msg = await tx.officialMessage.create({
           data: {
             channelId,
             senderId: userId,
             content,
+            parentMessageId: parentMessageId ?? null,
           },
         });
 
@@ -474,12 +492,13 @@ export class OfficialChannelService {
         await tx.auditLog.create({
           data: {
             actorId: userId,
-            action: 'OFFICIAL_MESSAGE_SENT',
+            action: parentMessageId ? 'OFFICIAL_MESSAGE_REPLY_SENT' : 'OFFICIAL_MESSAGE_SENT',
             entityType: 'OFFICIAL_CHANNEL',
             entityId: channelId,
             details: {
               messageId: msg.id,
               contentLength: content.length,
+              parentMessageId: parentMessageId ?? null,
             },
           },
         });
@@ -488,6 +507,253 @@ export class OfficialChannelService {
       });
 
       return { success: true, data: { messageId } };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Create a new official channel.
+   */
+  async createChannel(
+    campusId: string,
+    name: string,
+    slug: string,
+    description: string | null,
+    channelType: ChannelTypeEnum,
+    isReadOnlyForStudents: boolean,
+    createdById?: string
+  ): Promise<ServiceResult<{ channelId: string }>> {
+    try {
+      const campus = await prisma.campus.findFirst({
+        where: { id: campusId, deletedAt: null },
+      });
+      if (!campus) {
+        return {
+          success: false,
+          error: 'Campus not found',
+          code: 'NOT_FOUND' as ErrorCode,
+        };
+      }
+
+      const existing = await prisma.officialChannel.findFirst({
+        where: { campusId, slug },
+      });
+      if (existing) {
+        if (existing.deletedAt === null) {
+          return {
+            success: false,
+            error: 'A channel with this slug already exists for the campus',
+            code: 'CONFLICT' as ErrorCode,
+          };
+        } else {
+          const updated = await prisma.officialChannel.update({
+            where: { id: existing.id },
+            data: {
+              name,
+              description,
+              channelType,
+              isReadOnlyForStudents,
+              createdById: createdById ?? null,
+              deletedAt: null,
+            },
+          });
+          return { success: true, data: { channelId: updated.id } };
+        }
+      }
+
+      const channel = await prisma.officialChannel.create({
+        data: {
+          campusId,
+          name,
+          slug,
+          description,
+          channelType,
+          isReadOnlyForStudents,
+          createdById: createdById ?? null,
+        },
+      });
+
+      return { success: true, data: { channelId: channel.id } };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Edit a message.
+   */
+  async editMessage(
+    messageId: string,
+    userId: string,
+    content: string
+  ): Promise<ServiceResult<{ messageId: string }>> {
+    try {
+      const msg = await prisma.officialMessage.findFirst({
+        where: { id: messageId, deletedAt: null },
+      });
+
+      if (!msg) {
+        return {
+          success: false,
+          error: 'Message not found',
+          code: 'NOT_FOUND' as ErrorCode,
+        };
+      }
+
+      if (msg.senderId !== userId) {
+        return {
+          success: false,
+          error: 'You are not authorized to edit this message',
+          code: 'FORBIDDEN' as ErrorCode,
+        };
+      }
+
+      const updated = await prisma.officialMessage.update({
+        where: { id: messageId },
+        data: { content },
+      });
+
+      return { success: true, data: { messageId: updated.id } };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a message.
+   */
+  async deleteMessage(
+    messageId: string,
+    userId: string
+  ): Promise<ServiceResult<{ deleted: boolean }>> {
+    try {
+      const msg = await prisma.officialMessage.findFirst({
+        where: { id: messageId, deletedAt: null },
+      });
+
+      if (!msg) {
+        return {
+          success: false,
+          error: 'Message not found',
+          code: 'NOT_FOUND' as ErrorCode,
+        };
+      }
+
+      const user = await prisma.user.findFirst({
+        where: { id: userId, deletedAt: null },
+        include: { role: true },
+      });
+
+      const isSender = msg.senderId === userId;
+      const isAdmin = user?.role?.name === 'ADMIN';
+
+      if (!isSender && !isAdmin) {
+        return {
+          success: false,
+          error: 'You are not authorized to delete this message',
+          code: 'FORBIDDEN' as ErrorCode,
+        };
+      }
+
+      await prisma.officialMessage.update({
+        where: { id: messageId },
+        data: { deletedAt: new Date() },
+      });
+
+      return { success: true, data: { deleted: true } };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch replies for a parent message.
+   */
+  async getReplies(
+    messageId: string,
+    userId: string,
+    cursor?: string,
+    limit: number = 20
+  ): Promise<ServiceResult<{ replies: any[]; nextCursor: string | null }>> {
+    try {
+      const user = await prisma.user.findFirst({
+        where: { id: userId, deletedAt: null },
+        include: { role: true },
+      });
+
+      if (!user) {
+        return {
+          success: false,
+          error: 'User not found',
+          code: 'NOT_FOUND' as ErrorCode,
+        };
+      }
+
+      if (user.role.name === 'ALUMNI') {
+        return {
+          success: false,
+          error: 'Alumni are not allowed to query official channel messages',
+          code: 'ALUMNI_RESTRICTED' as ErrorCode,
+        };
+      }
+
+      const parentMsg = await prisma.officialMessage.findFirst({
+        where: { id: messageId, deletedAt: null },
+      });
+
+      if (!parentMsg) {
+        return {
+          success: false,
+          error: 'Parent message not found',
+          code: 'NOT_FOUND' as ErrorCode,
+        };
+      }
+
+      const campusCheck = await validateCampusAccess(prisma, userId, parentMsg.channelId);
+      if (!campusCheck.valid) {
+        return {
+          success: false,
+          error: campusCheck.error || 'Campus access denied',
+          code: 'CAMPUS_MISMATCH' as ErrorCode,
+        };
+      }
+
+      const replies = await prisma.officialMessage.findMany({
+        where: {
+          parentMessageId: messageId,
+          deletedAt: null,
+        },
+        take: limit + 1,
+        cursor: cursor ? { id: cursor } : undefined,
+        skip: cursor ? 1 : 0,
+        orderBy: { createdAt: 'asc' },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              displayName: true,
+              avatarUrl: true,
+            },
+          },
+        },
+      });
+
+      let nextCursor: string | null = null;
+      let paginatedReplies = replies;
+
+      if (replies.length > limit) {
+        nextCursor = replies[limit].id;
+        paginatedReplies = replies.slice(0, limit);
+      }
+
+      return {
+        success: true,
+        data: {
+          replies: paginatedReplies,
+          nextCursor,
+        },
+      };
     } catch (error) {
       throw error;
     }
