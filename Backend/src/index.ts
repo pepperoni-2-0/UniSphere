@@ -8,6 +8,11 @@ import alumniRoutes from "./routes/alumni.routes.js";
 import connectionRoutes from "./routes/connection.routes.js";
 import campusRoutes from "./routes/campus.routes.js";
 import channelRoutes from "./routes/channel.routes.js";
+import socialPostRoutes from "./routes/socialPost.routes.js";
+import storyRoutes from "./routes/story.routes.js";
+import eventRoutes from "./routes/event.routes.js";
+import chatRoutes from "./routes/chat.routes.js";
+import chatMessageRoutes from "./routes/chatMessage.routes.js";
 
 dotenv.config();
 
@@ -29,6 +34,11 @@ app.use("/api/v1/alumni", alumniRoutes);
 app.use("/api/v1/connections", connectionRoutes);
 app.use("/api/v1/campuses", campusRoutes);
 app.use("/api/v1/channels", channelRoutes);
+app.use("/api/v1/social/posts", socialPostRoutes);
+app.use("/api/v1/social/stories", storyRoutes);
+app.use("/api/v1/social/events", eventRoutes);
+app.use("/api/v1/chats", chatRoutes);
+app.use("/api/v1/chats/:chatId/messages", chatMessageRoutes);
 
 // Health check
 app.get("/api/v1/health", (req, res) => {
