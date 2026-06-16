@@ -13,6 +13,11 @@ import storyRoutes from "./routes/story.routes.js";
 import eventRoutes from "./routes/event.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
 import chatMessageRoutes from "./routes/chatMessage.routes.js";
+import mediaRoutes from "./routes/media.routes.js";
+import notificationRoutes from "./routes/notification.routes.js";
+import moderationRoutes from "./routes/moderation.routes.js";
+import roleRoutes from "./routes/role.routes.js";
+import auditRoutes from "./routes/audit.routes.js";
 
 dotenv.config();
 
@@ -39,6 +44,11 @@ app.use("/api/v1/social/stories", storyRoutes);
 app.use("/api/v1/social/events", eventRoutes);
 app.use("/api/v1/chats", chatRoutes);
 app.use("/api/v1/chats/:chatId/messages", chatMessageRoutes);
+app.use("/api/v1/media", mediaRoutes);
+app.use("/api/v1/notifications", notificationRoutes);
+app.use("/api/v1/moderation", moderationRoutes);
+app.use("/api/v1/roles", roleRoutes);
+app.use("/api/v1/audit", auditRoutes);
 
 // Health check
 app.get("/api/v1/health", (req, res) => {
