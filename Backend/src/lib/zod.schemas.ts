@@ -14,3 +14,21 @@ export const loginSchema = z.object({
   officialEmail: z.string().email("Invalid email format"),
   password: z.string().min(1, "Password is required"),
 });
+
+export const oauthCallbackSchema = z.object({
+  code: z.string().min(1, "Authorization code is required"),
+  state: z.string().min(1, "State token is required"),
+});
+
+export const updateStatusSchema = z.object({
+  customStatusText: z.string().max(255, "Custom status must be 255 characters or fewer").nullable().optional(),
+});
+
+export const updateBioSchema = z.object({
+  bio: z.string().max(1000, "Bio must be 1000 characters or fewer").nullable().optional(),
+});
+
+export const updateAvatarSchema = z.object({
+  avatarUrl: z.string().url("Invalid avatar URL format").nullable().optional().or(z.literal("")),
+});
+
